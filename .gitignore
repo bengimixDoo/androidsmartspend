@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+**/build/
+!/gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# Android Studio
+.idea/
+*.iml
+.idea/caches/
+.idea/libraries/
+.idea/workspace.xml
+.idea/gradle.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Local config & keys
+local.properties
+*.keystore
+*.jks
+*.properties
+*.keystore.properties
+
+# Logs & misc
+*.log
+.cxx/
+captures/
+output.json
+
+# APK/Bundles (don’t commit build artifacts)
+*.apk
+*.aab
