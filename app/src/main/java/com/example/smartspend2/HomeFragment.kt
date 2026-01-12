@@ -59,26 +59,42 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadDataAndUpdateUI() {
-        // Lấy toàn bộ giao dịch từ DB
         val allData = dbHelper.getAllTransactions()
         transactions.clear()
         transactions.addAll(allData)
 
-        // Sắp xếp và lấy 5 giao dịch gần nhất để hiển thị
+        // SẮP XẾP THÔNG MINH (Hỗ trợ cả Tiếng Anh "Jan" và Tiếng Việt "Th1")
         val recentTransactions = transactions.sortedByDescending { transaction ->
-            try {
-                SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).parse(transaction.date) ?: Date()
-            } catch (e: Exception) {
-                Log.e("HomeFragment", "Lỗi định dạng ngày: ${transaction.date}", e)
-                Date()
-            }
+            parseDateFlexible(transaction.date)
         }.take(5)
 
-        // Cập nhật Adapter cho danh sách giao dịch
         rvTransactions.adapter = TransactionAdapter(recentTransactions) { _, _ -> }
-
-        // Vẽ lại biểu đồ và chú thích
         setupPieChartAndLegend()
+    }
+
+    // Hàm phụ trợ: Thử đọc mọi kiểu ngày tháng
+    private fun parseDateFlexible(dateString: String): Date {
+        // 1. Thử đọc theo Tiếng Anh (cho dữ liệu mẫu: Jan, Feb...)
+        var date = try {
+            SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).parse(dateString)
+        } catch (e: Exception) { null }
+
+        // 2. Nếu thất bại, thử đọc theo Tiếng Việt (cho dữ liệu bạn nhập: Th1, Th2...)
+        if (date == null) {
+            date = try {
+                SimpleDateFormat("dd MMM yyyy", Locale("vi", "VN")).parse(dateString)
+            } catch (e: Exception) { null }
+        }
+
+        // 3. Nếu vẫn không được, thử theo ngôn ngữ mặc định của máy
+        if (date == null) {
+            date = try {
+                SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).parse(dateString)
+            } catch (e: Exception) { null }
+        }
+
+        // Nếu tất cả đều thua, trả về mốc thời gian gốc (1970)
+        return date ?: Date(0)
     }
 
     private fun setupPieChartAndLegend() {
@@ -136,7 +152,7 @@ class HomeFragment : Fragment() {
             setHoleColor(Color.TRANSPARENT)
             transparentCircleRadius = 55f
             holeRadius = 50f
-            setCenterText("Expenses")
+            setCenterText("Chi tiêu")
             setCenterTextSize(18f)
             setCenterTextColor(Color.parseColor("#202B3C"))
 

@@ -14,7 +14,7 @@ class TransactionAdapter(private val transactions: List<Transaction>,
         RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: Transaction) {
             binding.tvTitle.text = transaction.title
-            binding.tvAmount.text = "Rs. ${transaction.amount}"
+            binding.tvAmount.text = "${transaction.amount} Đ"
             binding.tvCategory.text = transaction.category
             binding.tvDate.text = transaction.date
         }

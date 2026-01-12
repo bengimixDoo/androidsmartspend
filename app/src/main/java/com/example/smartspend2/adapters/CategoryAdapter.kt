@@ -16,12 +16,12 @@ class CategoryAdapter(
 
         fun bind(category: Category) {
             binding.tvCategoryName.text = category.name
-            binding.tvAllocated.text = "Allocated: Rs. ${category.allocatedAmount}"
-            binding.tvSpent.text = if (category.isExpense) "Spent: Rs. ${category.spentAmount}" else "Earned: Rs. ${category.spentAmount}"
+            binding.tvAllocated.text = "Ngân sách: ${category.allocatedAmount} Đ"
+            binding.tvSpent.text = if (category.isExpense) "Đã chi: ${category.spentAmount} Đ" else "Đã nhận: ${category.spentAmount} Đ"
             binding.tvRemaining.text = if (category.isExpense)
-                "Remaining: Rs. ${category.allocatedAmount - category.spentAmount}"
+                "Còn: ${category.allocatedAmount - category.spentAmount} Đ"
             else
-                "Remaining: Rs. ${category.spentAmount - category.allocatedAmount}"
+                "Còn: ${category.spentAmount - category.allocatedAmount} Đ"
 
             val percent = if (category.isExpense)
                 (category.spentAmount / category.allocatedAmount * 100).toInt()

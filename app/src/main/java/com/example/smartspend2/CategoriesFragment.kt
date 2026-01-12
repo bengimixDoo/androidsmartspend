@@ -87,8 +87,8 @@ class CategoriesFragment : Fragment() {
             val isExpense = rbExpense.isChecked
 
             if (name.isEmpty() || allocatedAmount == null) {
-                etCategoryName.error = if (name.isEmpty()) "Enter category name" else null
-                etAllocatedAmount.error = if (allocatedAmount == null) "Enter valid amount" else null
+                etCategoryName.error = if (name.isEmpty()) "Nhập tên danh mục" else null
+                etAllocatedAmount.error = if (allocatedAmount == null) "Nhập số tiền" else null
             } else {
                 // Add new category to the database
                 val newCategory = Category(name, allocatedAmount, 0f, isExpense)
@@ -99,7 +99,7 @@ class CategoriesFragment : Fragment() {
                     categoryAdapter.notifyDataSetChanged()
                     dialog.dismiss()
                 } else {
-                    etCategoryName.error = "Category already exists"
+                    etCategoryName.error = "Danh mục đã tồn tại"
                 }
             }
         }
@@ -109,14 +109,14 @@ class CategoriesFragment : Fragment() {
 
     private fun showDeleteCategoryDialog(category: Category, position: Int) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Delete Category")
-            .setMessage("Are you sure you want to delete the '${category.name}' category?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle("Xoá danh mục")
+            .setMessage("Ban chắc chắn muốn xoá danh mục '${category.name}' ?")
+            .setPositiveButton("Xoá") { _, _ ->
                 dbHelper.deleteCategory(category.name)
                 categories.removeAt(position)
                 categoryAdapter.notifyDataSetChanged()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Huỷ bỏ", null)
             .show()
     }
 }

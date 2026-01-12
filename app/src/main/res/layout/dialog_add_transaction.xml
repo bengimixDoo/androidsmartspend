@@ -16,7 +16,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-smallcaps"
-        android:text="Add Transaction"
+        android:text="@string/title_add_transaction"
         android:textColor="#202B3C"
         android:textSize="25sp"
         android:textStyle="bold" />
@@ -34,7 +34,7 @@
             android:layout_width="128dp"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="Expense"
+            android:text="@string/expense"
             android:textColor="#202B3C" /> <!-- Default to Expense -->
 
         <RadioButton
@@ -42,7 +42,7 @@
             android:layout_width="126dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:text="Income"
+            android:text="@string/income"
             android:textColor="#202B3C" />
     </RadioGroup>
 
@@ -51,7 +51,7 @@
         android:id="@+id/etTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Title"
+        android:hint="@string/hint_title"
         android:background="@drawable/bg_input_rounded"
         android:padding="12dp"
         android:textColor="#202B3C"
@@ -63,7 +63,7 @@
         android:id="@+id/etAmount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Amount"
+        android:hint="@string/hint_amount"
         android:inputType="numberDecimal"
         android:background="@drawable/bg_input_rounded"
         android:padding="12dp"
@@ -85,7 +85,7 @@
         android:id="@+id/etDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Date (dd MMM yyyy)"
+        android:hint="@string/hint_date_format"
         android:background="@drawable/bg_input_rounded"
         android:padding="12dp"
         android:textColor="#202B3C"
@@ -96,7 +96,7 @@
         android:id="@+id/btnSubmit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Transaction"
+        android:text="@string/btn_add_transaction"
         android:textColor="@android:color/white"
         android:shadowColor="@color/black"
         android:backgroundTint="@color/primary"

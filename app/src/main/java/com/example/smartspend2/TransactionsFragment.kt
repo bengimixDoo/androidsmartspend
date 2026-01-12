@@ -17,9 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smartspend2.models.Category
 import com.example.smartspend2.models.Transaction
-import com.example.smartspend2.DatabaseHelper
 import com.example.smartspend2.adapters.TransactionAdapter
-//import com.example.smartspend2.storage.SmartSpendDatabase
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +27,6 @@ class TransactionsFragment : Fragment() {
     private lateinit var transactionAdapter: TransactionAdapter
     private val transactions = mutableListOf<Transaction>()
     private lateinit var dbHelper: DatabaseHelper
-    //private lateinit var roomDb: SmartSpendDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,16 +48,16 @@ class TransactionsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.rvTransactions)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        // 2. KHỞI TẠO ADAPTER TRƯỚC (QUAN TRỌNG: Phải làm bước này trước khi load dữ liệu)
+        // 2. KHỞI TẠO ADAPTER TRƯỚC
         transactionAdapter = TransactionAdapter(transactions) { transaction, position ->
             showTransactionOptions(transaction, position)
         }
         recyclerView.adapter = transactionAdapter
 
-        // 3. LOAD DỮ LIỆU SAU (Lúc này Adapter đã có, nên gọi notify sẽ không bị lỗi)
+        // 3. LOAD DỮ LIỆU SAU
         loadTransactions()
 
-        // 4. Các nút bấm khác
+        // 4. Xử lý nút Thêm
         val fabAdd: View = view.findViewById(R.id.fabAddTransaction)
         fabAdd.setOnClickListener {
             showAddTransactionDialog()
@@ -83,8 +80,16 @@ class TransactionsFragment : Fragment() {
         val etDate = dialogView.findViewById<EditText>(R.id.etDate)
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
 
-        // Default categories
-        val defaultCategories = listOf("Food", "Transport", "Bills", "Entertainment")
+        // --- SỬA: Lấy tên danh mục từ strings.xml để chuẩn tiếng Việt ---
+        val defaultCategories = listOf(
+            getString(R.string.cat_food),
+            getString(R.string.cat_transport),
+            getString(R.string.cat_bills),
+            getString(R.string.cat_entertainment),
+            getString(R.string.cat_shopping),
+            getString(R.string.cat_salary),
+            getString(R.string.cat_other)
+        )
 
         // Load user-created categories from the database
         val userCategories = dbHelper.getAllCategories().map { it.name }
@@ -122,7 +127,7 @@ class TransactionsFragment : Fragment() {
             val isExpense = rbExpense.isChecked
 
             if (title.isEmpty() || amount == null || date.isEmpty()) {
-                Toast.makeText(context, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, getString(R.string.msg_fill_error), Toast.LENGTH_SHORT).show()
             } else {
                 val transaction = Transaction(
                     title = title,
@@ -156,7 +161,9 @@ class TransactionsFragment : Fragment() {
             { _, year, month, dayOfMonth ->
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(year, month, dayOfMonth)
-                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                // Dùng Locale tiếng Anh để giữ format chuẩn cho DB,
+                // hiển thị tiếng Việt đã có hàm xử lý ở HomeFragment
+                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
                 onDateSelected(dateFormat.format(selectedDate.time))
             },
             calendar.get(Calendar.YEAR),
@@ -168,8 +175,8 @@ class TransactionsFragment : Fragment() {
 
     private fun showTransactionOptions(transaction: Transaction, position: Int) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Transaction Options")
-            .setItems(arrayOf("Edit", "Delete")) { _, which ->
+            .setTitle("Tùy chọn giao dịch") // Tiếng Việt
+            .setItems(arrayOf("Sửa", "Xóa")) { _, which -> // Tiếng Việt
                 when (which) {
                     0 -> showAddTransactionDialog(transaction, position)
                     1 -> {
@@ -186,21 +193,26 @@ class TransactionsFragment : Fragment() {
     private fun updateCategorySpending() {
         val spendingMap = dbHelper.calculateCategorySpending()
         val categories = dbHelper.getAllCategories()
+        val categoriesToCheck = mutableListOf<Category>()
 
         categories.forEach { category ->
             category.spentAmount = spendingMap[category.name] ?: 0f
             dbHelper.updateCategory(category)
+            categoriesToCheck.add(category)
         }
+
+        // Kiểm tra giới hạn chi tiêu sau khi cập nhật
+        checkSpendingLimits(categoriesToCheck)
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "SPENDING_ALERTS",
-                "Spending Alerts",
+                "Cảnh báo chi tiêu", // Tên kênh tiếng Việt
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Alerts when your spending exceeds the budget"
+                description = "Thông báo khi bạn vượt quá ngân sách" // Mô tả tiếng Việt
             }
             val manager = requireContext().getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
@@ -209,34 +221,35 @@ class TransactionsFragment : Fragment() {
 
     fun checkSpendingLimits(categoryList: List<Category>) {
         categoryList.forEach { category ->
-            val percentSpent = (category.spentAmount / category.allocatedAmount) * 100
+            // Tránh chia cho 0
+            if (category.allocatedAmount > 0) {
+                val percentSpent = (category.spentAmount / category.allocatedAmount) * 100
 
-            when {
-                percentSpent >= 100 -> {
-                    sendNotification(
-                        category.name,
-                        "Alert! ${category.name} budget exceeded!",
-                        "You've exceeded your ${category.name} budget by ${percentSpent.toInt() - 100}%."
-                    )
-                }
-                percentSpent >= 90 -> {
-                    sendNotification(
-                        category.name,
-                        "Warning! ${category.name} budget nearing limit",
-                        "You're at ${percentSpent.toInt()}% of your ${category.name} budget. Consider slowing down!"
-                    )
-                }
-                percentSpent >= 80 -> {
-                    sendNotification(
-                        category.name,
-                        "Heads up! ${category.name} budget almost full",
-                        "You've used ${percentSpent.toInt()}% of your ${category.name} budget. Plan wisely!"
-                    )
+                when {
+                    percentSpent >= 100 -> {
+                        sendNotification(
+                            category.name,
+                            "Cảnh báo! Ngân sách ${category.name} bị vượt quá!", "Hãy kiểm soát lại mức chi tiêu!"
+                        )
+                    }
+                    percentSpent >= 90 -> {
+                        sendNotification(
+                            category.name,
+                            "Cảnh báo! Sắp hết ngân sách ${category.name}",
+                            "Bạn đã dùng ${percentSpent.toInt()}% ngân sách ${category.name}. Hãy chi tiêu chậm lại!"
+                        )
+                    }
+                    percentSpent >= 80 -> {
+                        sendNotification(
+                            category.name,
+                            "Chú ý! Ngân sách ${category.name} sắp đầy",
+                            "Bạn đã dùng ${percentSpent.toInt()}% ngân sách ${category.name}. Hãy lên kế hoạch hợp lý!"
+                        )
+                    }
                 }
             }
         }
     }
-
 
     private fun sendNotification(category: String, title: String, message: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -244,32 +257,19 @@ class TransactionsFragment : Fragment() {
                     requireContext(),
                     android.Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED) {
-                // Permission not granted, skip notification
                 return
             }
         }
 
         val builder = NotificationCompat.Builder(requireContext(), "SPENDING_ALERTS")
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(R.drawable.ic_notification) // Đảm bảo bạn có icon này
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
-
         val manager = NotificationManagerCompat.from(requireContext())
+        // Sử dụng ID ngẫu nhiên hoặc hashcode để không bị đè thông báo
         manager.notify(category.hashCode(), builder.build())
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-
