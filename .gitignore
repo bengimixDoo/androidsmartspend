@@ -18,7 +18,6 @@
 local.properties
 *.keystore
 *.jks
-*.properties
 *.keystore.properties
 
 # Logs & misc

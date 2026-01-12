@@ -1,0 +1,6 @@
+<!-- File: res/drawable/shape_circle.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- Màu này chỉ là màu mặc định, sẽ được thay đổi trong code -->
+    <solid android:color="@android:color/darker_gray" />
+</shape>

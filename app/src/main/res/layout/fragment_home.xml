@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -17,14 +18,36 @@
         android:textColor="#202B3C"
         android:layout_marginBottom="10dp"/>
 
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/pieChart"
+    <!-- ================== SỬA ĐỔI TỪ ĐÂY ================== -->
+
+    <!-- 1. Tạo một LinearLayout để làm card chứa biểu đồ và chú thích -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:layout_margin="8dp"
         android:background="@drawable/chart_background"
         android:elevation="4dp"
-        android:padding="16dp"/>
+        android:padding="16dp">
+
+        <!-- 2. PieChart bây giờ nằm bên trong, đã bỏ background và các style khác -->
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="match_parent"
+            android:layout_height="250dp" />
+
+        <!-- 3. RecyclerView cho chú thích cũng nằm bên trong -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvLegend"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            tools:itemCount="4"
+            tools:listitem="@layout/item_legend" />
+
+    </LinearLayout>
+
+    <!-- ==================== ĐẾN ĐÂY ==================== -->
 
     <TextView
         android:text="Recent Transactions"
