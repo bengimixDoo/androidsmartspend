@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.smartspend2.HomeFragment"
+        android:label="HomeFragment" />
+    <fragment
+        android:id="@+id/nav_transactions"
+        android:name="com.example.smartspend2.TransactionsFragment"
+        android:label="TransactionsFragment" />
+    <fragment
+        android:id="@+id/nav_categories"
+        android:name="com.example.smartspend2.CategoriesFragment"
+        android:label="CategoriesFragment" />
+    <fragment
+        android:id="@+id/nav_reports"
+        android:name="com.example.smartspend2.ReportsFragment"
+        android:label="fragment_reports"
+        tools:layout="@layout/fragment_reports" />
+</navigation>

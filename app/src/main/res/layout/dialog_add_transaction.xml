@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:background="@drawable/bg_dialog_rounded"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:text="Add Transaction"
+        android:textColor="#202B3C"
+        android:textSize="25sp"
+        android:textStyle="bold" />
+
+    <RadioGroup
+        android:id="@+id/rgTransactionType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="10dp">
+
+        <RadioButton
+            android:id="@+id/rbExpense"
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Expense"
+            android:textColor="#202B3C" /> <!-- Default to Expense -->
+
+        <RadioButton
+            android:id="@+id/rbIncome"
+            android:layout_width="126dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Income"
+            android:textColor="#202B3C" />
+    </RadioGroup>
+
+
+    <EditText
+        android:id="@+id/etTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Title"
+        android:background="@drawable/bg_input_rounded"
+        android:padding="12dp"
+        android:textColor="#202B3C"
+        android:textColorHint="#999"
+        android:layout_marginBottom="12dp"/>
+
+
+    <EditText
+        android:id="@+id/etAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Amount"
+        android:inputType="numberDecimal"
+        android:background="@drawable/bg_input_rounded"
+        android:padding="12dp"
+        android:textColor="#202B3C"
+        android:textColorHint="#999"
+        android:layout_marginBottom="12dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_input_rounded"
+        android:padding="13dp"
+        android:layout_marginBottom="12dp"
+        android:drawableEnd="@drawable/ic_arrow_drop_down"
+        android:popupBackground="@color/white"/>
+
+    <EditText
+        android:id="@+id/etDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Date (dd MMM yyyy)"
+        android:background="@drawable/bg_input_rounded"
+        android:padding="12dp"
+        android:textColor="#202B3C"
+        android:textColorHint="#999"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Transaction"
+        android:textColor="@android:color/white"
+        android:shadowColor="@color/black"
+        android:backgroundTint="@color/primary"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="20dp"
+        android:padding="12dp"
+        android:background="@drawable/bg_button_rounded"/>
+
+
+</LinearLayout>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_rounded"
+    android:padding="30dp"
+    android:layout_gravity="center">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_category"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-smallcaps"
+        android:textColor="@color/textDark"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etCategoryName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Category Name"
+        android:background="@drawable/bg_input_rounded"
+        android:padding="12dp"
+        android:textColor="#202B3C"
+        android:textColorHint="#999"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/etAllocatedAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Allocated Amount"
+        android:inputType="numberDecimal"
+        android:background="@drawable/bg_input_rounded"
+        android:padding="12dp"
+        android:textColor="#202B3C"
+        android:textColorHint="#999"
+        android:layout_marginBottom="16dp"/>
+
+    <RadioGroup
+        android:id="@+id/radioGroupType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/rbExpense"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Source of Expenditure "
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/rbIncome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Source of Income "/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Category"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/primary"
+        android:background="@drawable/bg_button_rounded"/>
+</LinearLayout>
