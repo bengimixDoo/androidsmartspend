@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_home"
-        android:title="Home" />
+        android:title="@string/nav_home" />
+
     <item
         android:id="@+id/nav_transactions"
         android:icon="@drawable/ic_transactions"
-        android:title="Transactions" />
+        android:title="@string/nav_transactions" />
+
     <item
         android:id="@+id/nav_categories"
         android:icon="@drawable/ic_categories"
-        android:title="Categories" />
+        android:title="@string/nav_categories" />
+
     <item
         android:id="@+id/nav_reports"
         android:icon="@drawable/ic_reports"
-        android:title="Reports" />
+        android:title="@string/nav_reports" />
 </menu>
-
-

@@ -8,7 +8,7 @@
     android:padding="16dp">
 
     <TextView
-        android:text="Overview"
+        android:text="@string/overview"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_marginTop="25dp"
@@ -18,39 +18,32 @@
         android:textColor="#202B3C"
         android:layout_marginBottom="10dp"/>
 
-    <!-- ================== SỬA ĐỔI TỪ ĐÂY ================== -->
-
-    <!-- 1. Tạo một LinearLayout để làm card chứa biểu đồ và chú thích -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_margin="8dp"
+        android:layout_margin="4dp"
         android:background="@drawable/chart_background"
         android:elevation="4dp"
         android:padding="16dp">
 
-        <!-- 2. PieChart bây giờ nằm bên trong, đã bỏ background và các style khác -->
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/pieChart"
             android:layout_width="match_parent"
             android:layout_height="250dp" />
 
-        <!-- 3. RecyclerView cho chú thích cũng nằm bên trong -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvLegend"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             tools:itemCount="4"
             tools:listitem="@layout/item_legend" />
 
     </LinearLayout>
 
-    <!-- ==================== ĐẾN ĐÂY ==================== -->
-
     <TextView
-        android:text="Recent Transactions"
+        android:text="@string/recent_transactions"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_marginTop="15dp"
@@ -66,4 +59,5 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:background="@drawable/chart_background" />
+
 </LinearLayout>

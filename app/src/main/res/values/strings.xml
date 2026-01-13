@@ -1,13 +1,54 @@
 <resources>
     <string name="app_name">SmartSpend</string>
     <string name="smartspend">Smart Spend</string>
-    <string name="appline">The Best App To\n Manage Your Money</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="category">Category</string>
-    <string name="exampleDate">12 Apr 2025</string>
-    <string name="transaction_title">Transaction Title</string>
-    <string name="priceExample">Rs. 1000</string>
-    <string name="add_category">Add Category</string>
-    <string name="add">add</string>
-    <string name="get_started">Get started</string>
+    <string name="appline">Quản lý tài chính thông minh\nvà hiệu quả nhất</string>
+    <string name="get_started">Bắt đầu</string>
+
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_transactions">Giao dịch</string>
+    <string name="nav_categories">Danh mục</string>
+    <string name="nav_reports">Báo cáo</string>
+
+    <string name="overview">Tổng quan</string>
+    <string name="chart_center_text">Chi tiêu</string>
+    <string name="recent_transactions">Giao dịch gần đây</string>
+    <string name="no_data">Chưa có dữ liệu</string>
+
+    <string name="add_transaction_title">Thêm giao dịch</string>
+    <string name="edit_transaction_title">Sửa giao dịch</string>
+    <string name="income">Thu nhập</string>
+    <string name="expense">Chi tiêu</string>
+    <string name="hint_title">Tiêu đề (VD: Ăn sáng)</string>
+    <string name="hint_amount">Số tiền (VD: 50000)</string>
+    <string name="hint_date">Ngày tháng</string>
+    <string name="hint_category">Chọn danh mục</string>
+    <string name="btn_save">Lưu lại</string>
+    <string name="btn_cancel">Hủy bỏ</string>
+    <string name="msg_fill_error">Vui lòng điền đủ thông tin!</string>
+
+    <string name="cat_food">Ăn uống</string>
+    <string name="cat_transport">Di chuyển</string>
+    <string name="cat_bills">Hóa đơn</string>
+    <string name="cat_entertainment">Giải trí</string>
+    <string name="cat_shopping">Mua sắm</string>
+    <string name="cat_salary">Lương</string>
+    <string name="cat_other">Khác</string>
+
+    <string name="hello_blank_fragment">Xin chào</string>
+    <string name="category">Danh mục</string>
+    <string name="exampleDate">12/04/2025</string>
+    <string name="transaction_title">Tên giao dịch</string>
+    <string name="priceExample">100.000 đ</string>
+    <string name="add_category">Thêm danh mục</string>
+    <string name="add">Thêm</string>
+    <string name="title_add_transaction">THÊM GIAO DỊCH</string>
+    <string name="btn_add_transaction">Thêm giao dịch</string>
+    <string name="hint_date_format">Ngày (ví dụ: 14 Jan 2026)</string>
+
+    <string name="title_add_category">THÊM DANH MỤC</string>
+    <string name="hint_category_name">Tên danh mục</string>
+    <string name="hint_allocated_amount">Ngân sách dự kiến</string>
+    <string name="source_expenditure">Nguồn Chi</string>
+    <string name="source_income">Nguồn Thu</string>
+    <string name="btn_add_category">Thêm danh mục</string>
 </resources>

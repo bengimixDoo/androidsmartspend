@@ -101,8 +101,9 @@ class CategoriesFragment : Fragment() {
             // Nếu là income, ngân sách mặc định là 0
             val allocatedAmount = if (isExpense) etAllocatedAmount.text.toString().toFloatOrNull() else 0f
 
-            if (name.isEmpty() || (isExpense && allocatedAmount == null)) {
-                Toast.makeText(context, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
+            if (name.isEmpty() || allocatedAmount == null) {
+                etCategoryName.error = if (name.isEmpty()) "Nhập tên danh mục" else null
+                etAllocatedAmount.error = if (allocatedAmount == null) "Nhập số tiền" else null
             } else {
                 val newCategory = Category(name, allocatedAmount!!, 0f, isExpense)
                 val result = dbHelper.insertCategory(newCategory)
@@ -112,7 +113,7 @@ class CategoriesFragment : Fragment() {
                     loadAndSyncCategories()
                     dialog.dismiss()
                 } else {
-                    etCategoryName.error = "Category already exists"
+                    etCategoryName.error = "Danh mục đã tồn tại"
                 }
             }
         }
@@ -124,14 +125,14 @@ class CategoriesFragment : Fragment() {
     // =====================================================================
     private fun showDeleteCategoryDialog(category: Category) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Delete Category")
-            .setMessage("Are you sure you want to delete the '${category.name}' category?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle("Xoá danh mục")
+            .setMessage("Ban chắc chắn muốn xoá danh mục '${category.name}' ?")
+            .setPositiveButton("Xoá") { _, _ ->
                 dbHelper.deleteCategory(category.name)
                 // Load lại toàn bộ để đồng bộ chính xác
                 loadAndSyncCategories()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Huỷ bỏ", null)
             .show()
     }
 

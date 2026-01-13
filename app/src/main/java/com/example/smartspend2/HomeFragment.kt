@@ -59,26 +59,29 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadDataAndUpdateUI() {
-        // Lấy toàn bộ giao dịch từ DB
         val allData = dbHelper.getAllTransactions()
         transactions.clear()
         transactions.addAll(allData)
 
-        // Sắp xếp và lấy 5 giao dịch gần nhất để hiển thị
+        // Sắp xếp các giao dịch theo ngày tháng, giao dịch mới nhất lên đầu
         val recentTransactions = transactions.sortedByDescending { transaction ->
-            try {
-                SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).parse(transaction.date) ?: Date()
-            } catch (e: Exception) {
-                Log.e("HomeFragment", "Lỗi định dạng ngày: ${transaction.date}", e)
-                Date()
-            }
+            parseDate(transaction.date)
         }.take(5)
 
-        // Cập nhật Adapter cho danh sách giao dịch
         rvTransactions.adapter = TransactionAdapter(recentTransactions) { _, _ -> }
-
-        // Vẽ lại biểu đồ và chú thích
         setupPieChartAndLegend()
+    }
+
+    // Hàm phụ trợ để chuyển đổi chuỗi ngày tháng thành đối tượng Date để sắp xếp
+    private fun parseDate(dateString: String): Date {
+        return try {
+            // Luôn phân tích ngày tháng theo định dạng tiếng Anh vì đó là cách
+            // dữ liệu được lưu nhất quán trong cơ sở dữ liệu.
+            SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).parse(dateString)
+        } catch (e: Exception) {
+            Log.e("HomeFragment", "Lỗi không thể phân tích ngày: '$dateString'", e)
+            Date(0) // Nếu lỗi, trả về một ngày cũ để xếp xuống cuối
+        }
     }
 
     private fun setupPieChartAndLegend() {
@@ -136,7 +139,7 @@ class HomeFragment : Fragment() {
             setHoleColor(Color.TRANSPARENT)
             transparentCircleRadius = 55f
             holeRadius = 50f
-            setCenterText("Expenses")
+            setCenterText("Chi tiêu")
             setCenterTextSize(18f)
             setCenterTextColor(Color.parseColor("#202B3C"))
 
