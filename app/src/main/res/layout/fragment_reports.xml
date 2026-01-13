@@ -1,14 +1,225 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ReportsFragment">
+    android:background="#E6F3F6"
+    android:fillViewport="true">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
 
-</FrameLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_input_rounded"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <Spinner
+                android:id="@+id/spinnerTimeFilter"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@null" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/chart_background"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:text="@string/income"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tvTotalIncome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0 đ"
+                    android:textColor="#4ECDC4"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/chart_background"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:text="@string/expense"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tvTotalExpense"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0 đ"
+                    android:textColor="#FF6B6B"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/chart_background"
+                android:elevation="2dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:text="Số dư"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <TextView
+                    android:id="@+id/tvNetBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0 đ"
+                    android:textColor="#202B3C"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Top 5 Chi tiêu lớn nhất"
+            android:textColor="#202B3C"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTopSpending"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/chart_background"
+            android:elevation="2dp"
+            android:nestedScrollingEnabled="false"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Xu hướng Thu/Chi (6 tháng)"
+            android:textColor="#202B3C"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/chart_background"
+            android:elevation="4dp"
+            android:padding="16dp">
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChartTrend"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Xu hướng từng Danh mục"
+            android:textColor="#202B3C"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_input_rounded"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <Spinner
+                android:id="@+id/spinnerCategoryTrend"
+                android:layout_width="match_parent"
+                android:layout_height="48dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/chart_background"
+            android:elevation="4dp"
+            android:padding="16dp">
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChartCategory"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Chi tiết theo Danh mục"
+            android:textColor="#202B3C"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCategoryReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="50dp"
+            android:background="@drawable/chart_background"
+            android:elevation="2dp"
+            android:nestedScrollingEnabled="false"
+            android:paddingVertical="8dp" />
+
+    </LinearLayout>
+</ScrollView>

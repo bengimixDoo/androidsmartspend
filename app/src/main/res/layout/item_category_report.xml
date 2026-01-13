@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:background="@drawable/item_selector"> <TextView
+    android:id="@+id/tvIcon"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:background="@drawable/shape_circle"
+    android:gravity="center"
+    android:text="A"
+    android:textColor="#FFFFFF"
+    android:textStyle="bold"
+    android:textSize="18sp"
+    android:layout_marginEnd="12dp"/>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvCategoryName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ăn uống"
+            android:textColor="#202B3C"
+            android:textStyle="bold"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tvTransactionCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5 giao dịch"
+            android:textColor="#888888"
+            android:textSize="12sp"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvTotalAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1.500.000 đ"
+        android:textColor="#FF6B6B"
+        android:textStyle="bold"
+        android:textSize="16sp"/>
+</LinearLayout>

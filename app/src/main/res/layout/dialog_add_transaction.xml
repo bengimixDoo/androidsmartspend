@@ -3,18 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
     android:background="@drawable/bg_dialog_rounded"
     android:orientation="vertical"
     android:padding="24dp">
 
     <TextView
+        android:id="@+id/tvDialogTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-smallcaps"
         android:text="@string/title_add_transaction"
         android:textColor="#202B3C"
@@ -31,17 +30,17 @@
 
         <RadioButton
             android:id="@+id/rbExpense"
-            android:layout_width="128dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/expense"
-            android:textColor="#202B3C" /> <!-- Default to Expense -->
+            android:textColor="#202B3C"
+            android:layout_marginEnd="20dp"/>
 
         <RadioButton
             android:id="@+id/rbIncome"
-            android:layout_width="126dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
             android:text="@string/income"
             android:textColor="#202B3C" />
     </RadioGroup>
@@ -70,6 +69,14 @@
         android:textColor="#202B3C"
         android:textColorHint="#999"
         android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Danh mục"
+        android:textStyle="bold"
+        android:layout_marginBottom="4dp"
+        android:layout_marginStart="4dp"/>
 
     <Spinner
         android:id="@+id/spinnerCategory"
@@ -101,9 +108,8 @@
         android:shadowColor="@color/black"
         android:backgroundTint="@color/primary"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="10dp"
         android:padding="12dp"
         android:background="@drawable/bg_button_rounded"/>
-
 
 </LinearLayout>
