@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
         val dbHelper = DatabaseHelper(this)
+        // Luôn tạo các danh mục mặc định nếu chúng chưa tồn tại
+        createDefaultCategoriesIfNeeded(dbHelper)
+        // Chỉ thêm dữ liệu giao dịch giả khi phát triển (nếu DB trống)
         addDummyData(dbHelper)
 
         // 4. Dùng lệnh "thần thánh" này để tự động nối Menu với Màn hình
@@ -31,11 +34,34 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setupWithNavController(navController)
     }
 }
-// Hàm tạo dữ liệu giả lập (Dummy Data)
-fun addDummyData(dbHelper: DatabaseHelper) {
-    // Nếu trong DB đã có dữ liệu rồi thì thôi không thêm nữa (tránh trùng lặp)
-    if (dbHelper.getAllTransactions().isNotEmpty()) return
 
+// Hàm này chỉ chạy MỘT LẦN để tạo các danh mục cơ bản cho người dùng mới
+fun createDefaultCategoriesIfNeeded(dbHelper: DatabaseHelper) {
+    // Nếu trong DB đã có danh mục rồi thì thôi không thêm nữa (tránh trùng lặp)
+    if (dbHelper.getAllCategories().isNotEmpty()) return
+
+    // Thêm các danh mục mặc định
+    val defaultCategories = listOf(
+        // --- DANH MỤC CHI (EXPENSE) ---
+        com.example.smartspend2.models.Category(name = "Food", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
+        com.example.smartspend2.models.Category(name = "Transport", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
+        com.example.smartspend2.models.Category(name = "Bills", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
+        com.example.smartspend2.models.Category(name = "Entertainment", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
+        com.example.smartspend2.models.Category(name = "Shopping", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
+        // --- DANH MỤC THU (INCOME) ---
+        com.example.smartspend2.models.Category(name = "Salary", allocatedAmount = 0f, spentAmount = 0f, isExpense = false),
+        com.example.smartspend2.models.Category(name = "Other", allocatedAmount = 0f, spentAmount = 0f, isExpense = false)
+    )
+    for (category in defaultCategories) {
+        dbHelper.insertCategory(category)
+    }
+}
+
+// Hàm tạo dữ liệu giao dịch giả lập (Dummy Data) để test
+fun addDummyData(dbHelper: DatabaseHelper) {
+    // Nếu trong DB đã có giao dịch rồi thì thôi không thêm nữa (tránh trùng lặp)
+    if (dbHelper.getAllTransactions().isNotEmpty()) return
+    
     val dummyList = listOf(
         // --- KHOẢN CHI (EXPENSE) ---
         // Food

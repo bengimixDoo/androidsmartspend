@@ -246,5 +246,32 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         )
     }
 
+    fun getCategoriesByType(isExpense: Boolean): List<Category> {
+        val db = readableDatabase
+        val categories = mutableListOf<Category>()
+        val selection = "$COLUMN_IS_EXPENSE_CATEGORY = ?"
+        val selectionArgs = arrayOf(if (isExpense) "1" else "0")
+        val cursor = db.query(
+            TABLE_CATEGORIES,
+            null, // all columns
+            selection,
+            selectionArgs,
+            null,
+            null,
+            "$COLUMN_CATEGORY_NAME ASC"
+        )
+
+        while (cursor.moveToNext()) {
+            val category = Category(
+                name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME)),
+                allocatedAmount = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_ALLOCATED_AMOUNT)),
+                spentAmount = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_SPENT_AMOUNT)),
+                isExpense = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_EXPENSE_CATEGORY)) == 1
+            )
+            categories.add(category)
+        }
+        cursor.close()
+        return categories
+    }
 
 }

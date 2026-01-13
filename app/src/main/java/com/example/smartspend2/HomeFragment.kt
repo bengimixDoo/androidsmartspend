@@ -67,7 +67,7 @@ class HomeFragment : Fragment() {
         // Sắp xếp và lấy 5 giao dịch gần nhất để hiển thị
         val recentTransactions = transactions.sortedByDescending { transaction ->
             try {
-                SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).parse(transaction.date) ?: Date()
+                SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).parse(transaction.date) ?: Date()
             } catch (e: Exception) {
                 Log.e("HomeFragment", "Lỗi định dạng ngày: ${transaction.date}", e)
                 Date()

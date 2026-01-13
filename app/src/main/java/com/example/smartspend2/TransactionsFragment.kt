@@ -87,31 +87,47 @@ class TransactionsFragment : Fragment() {
         val etDate = dialogView.findViewById<EditText>(R.id.etDate)
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
 
-        // Default categories
-        val defaultCategories = listOf("Food", "Transport", "Bills", "Entertainment")
-
-        // Load user-created categories from the database
-        val userCategories = dbHelper.getAllCategories().map { it.name }
-
-        // Combine and remove duplicates
-        val categories = (defaultCategories + userCategories).distinct()
-
-        // Set to spinner
-        spinnerCategory.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, categories)
-
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .create()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
+        // Hàm helper để cập nhật spinner category dựa theo loại thu/chi
+        fun updateCategorySpinner(isExpense: Boolean) {
+            val categories = dbHelper.getCategoriesByType(isExpense).map { it.name }
+            val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, categories)
+            spinnerCategory.adapter = adapter
+
+            // Nếu đang edit, chọn lại category cũ nếu nó tồn tại trong danh sách mới
+            existingTransaction?.let {
+                if (it.isExpense == isExpense) {
+                    val categoryIndex = categories.indexOf(it.category)
+                    if (categoryIndex >= 0) {
+                        spinnerCategory.setSelection(categoryIndex)
+                    }
+                }
+            }
+        }
+
+        // Thêm listener cho RadioButton để tự động cập nhật danh sách category
+        rbExpense.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) updateCategorySpinner(true)
+        }
+        rbIncome.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) updateCategorySpinner(false)
+        }
+
         // Populate fields if editing an existing transaction
         existingTransaction?.let {
             etTitle.setText(it.title)
             etAmount.setText(it.amount.toString())
-            val categoryIndex = categories.indexOf(it.category)
-            if (categoryIndex >= 0) spinnerCategory.setSelection(categoryIndex)
             etDate.setText(it.date)
+            // Set radio button, việc này sẽ tự động trigger listener ở trên để load đúng category
             if (it.isExpense) rbExpense.isChecked = true else rbIncome.isChecked = true
+        } ?: run {
+            // Nếu là giao dịch mới, mặc định là chi tiêu và load category chi tiêu
+            rbExpense.isChecked = true
+            updateCategorySpinner(true)
         }
 
         etDate.setOnClickListener {
@@ -121,30 +137,22 @@ class TransactionsFragment : Fragment() {
         btnSubmit.setOnClickListener {
             val title = etTitle.text.toString().trim()
             val amount = etAmount.text.toString().toFloatOrNull()
-            val category = spinnerCategory.selectedItem.toString()
+            val category = spinnerCategory.selectedItem?.toString() // An toàn hơn, tránh crash nếu spinner rỗng
             val date = etDate.text.toString().trim()
             val isExpense = rbExpense.isChecked
 
-            if (title.isEmpty() || amount == null || date.isEmpty()) {
-                Toast.makeText(context, "Please fill all fields correctly", Toast.LENGTH_SHORT).show()
+            if (title.isEmpty() || amount == null || date.isEmpty() || category == null) {
+                Toast.makeText(context, "Vui lòng điền đủ thông tin. Bạn có thể cần thêm danh mục cho loại này trước.", Toast.LENGTH_LONG).show()
             } else {
-                val transaction = Transaction(
-                    title = title,
-                    amount = amount,
-                    category = category,
-                    date = date,
-                    isExpense = isExpense
-                )
-
                 if (existingTransaction != null && position != null) {
-                    dbHelper.updateTransaction(existingTransaction.id, transaction)
-                    transactions[position] = transaction
+                    val updatedTransaction = Transaction(existingTransaction.id, title, amount, category, date, isExpense)
+                    dbHelper.updateTransaction(existingTransaction.id, updatedTransaction)
                 } else {
-                    dbHelper.insertTransaction(transaction)
-                    transactions.add(transaction)
+                    val newTransaction = Transaction(0, title, amount, category, date, isExpense)
+                    dbHelper.insertTransaction(newTransaction)
                 }
 
-                transactionAdapter.notifyDataSetChanged()
+                loadTransactions() // Load lại toàn bộ dữ liệu từ DB để đảm bảo tính nhất quán
                 updateCategorySpending()
                 dialog.dismiss()
             }
@@ -153,6 +161,7 @@ class TransactionsFragment : Fragment() {
         dialog.show()
     }
 
+
     private fun showDatePicker(onDateSelected: (String) -> Unit) {
         val calendar = Calendar.getInstance()
         val datePicker = DatePickerDialog(
@@ -160,7 +169,7 @@ class TransactionsFragment : Fragment() {
             { _, year, month, dayOfMonth ->
                 val selectedDate = Calendar.getInstance()
                 selectedDate.set(year, month, dayOfMonth)
-                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
                 onDateSelected(dateFormat.format(selectedDate.time))
             },
             calendar.get(Calendar.YEAR),
@@ -178,9 +187,8 @@ class TransactionsFragment : Fragment() {
                     0 -> showAddTransactionDialog(transaction, position)
                     1 -> {
                         dbHelper.deleteTransaction(transaction.id)
-                        transactions.removeAt(position)
-                        transactionAdapter.notifyDataSetChanged()
-                        updateCategorySpending()
+                        loadTransactions() // Load lại list từ DB để đảm bảo đồng bộ
+                        updateCategorySpending() // Cập nhật lại tiền đã tiêu cho category
                     }
                 }
             }
@@ -267,13 +275,3 @@ class TransactionsFragment : Fragment() {
 
 
 }
-
-
-
-
-
-
-
-
-
-
