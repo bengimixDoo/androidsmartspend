@@ -16,19 +16,34 @@ class CategoryAdapter(
 
         fun bind(category: Category) {
             binding.tvCategoryName.text = category.name
-            binding.tvAllocated.text = "Allocated: Rs. ${category.allocatedAmount}"
-            binding.tvSpent.text = if (category.isExpense) "Spent: Rs. ${category.spentAmount}" else "Earned: Rs. ${category.spentAmount}"
-            binding.tvRemaining.text = if (category.isExpense)
-                "Remaining: Rs. ${category.allocatedAmount - category.spentAmount}"
-            else
-                "Remaining: Rs. ${category.spentAmount - category.allocatedAmount}"
 
-            val percent = if (category.isExpense)
-                (category.spentAmount / category.allocatedAmount * 100).toInt()
-            else
-                (category.allocatedAmount / (category.spentAmount.takeIf { it > 0 } ?: 1f) * 100).toInt()
+            if (category.isExpense) {
+                // --- LOGIC CŨ CHO EXPENSE CATEGORY (GIỮ NGUYÊN) ---
+                binding.tvAllocated.visibility = android.view.View.VISIBLE
+                binding.tvRemaining.visibility = android.view.View.VISIBLE
+                binding.progressBar.visibility = android.view.View.VISIBLE
 
-            binding.progressBar.progress = percent.coerceAtMost(100)
+                binding.tvAllocated.text = "Ngân sách: ${category.allocatedAmount}đ"
+                binding.tvSpent.text = "Đã tiêu: ${category.spentAmount}đ"
+                binding.tvRemaining.text = "Còn lại: ${category.allocatedAmount - category.spentAmount}đ"
+
+                // Xử lý chia cho 0 để không bị crash
+                val allocated = category.allocatedAmount.takeIf { it > 0f } ?: 1f
+                val percent = (category.spentAmount / allocated * 100).toInt()
+
+                binding.progressBar.progress = percent.coerceAtMost(100)
+
+            } else {
+                // --- LOGIC MỚI CHO INCOME CATEGORY ---
+                // 1. Ẩn các view không cần thiết
+                binding.tvAllocated.visibility = android.view.View.GONE
+                binding.tvRemaining.visibility = android.view.View.GONE
+                binding.progressBar.visibility = android.view.View.GONE
+
+                // 2. Hiển thị tổng thu nhập một cách rõ ràng
+                binding.tvSpent.text = "Đã thu về: ${category.spentAmount}đ"
+            }
+
             // Set long press listener here
             binding.root.setOnLongClickListener {
                 onLongClick(category, adapterPosition)

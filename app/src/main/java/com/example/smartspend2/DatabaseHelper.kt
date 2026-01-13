@@ -12,7 +12,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "smartspend.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         // Transaction Table
         private const val TABLE_TRANSACTIONS = "transactions"
@@ -59,11 +59,34 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL(CREATE_CATEGORIES_TABLE)
     }
 
+    // THAY THẾ HÀM CŨ BẰNG HÀM NÀY
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_TRANSACTIONS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_CATEGORIES")
-        onCreate(db)
+        // Luôn kiểm tra phiên bản cũ để thực hiện nâng cấp đúng cách.
+        // oldVersion là phiên bản database hiện tại trên máy người dùng.
+        // newVersion là phiên bản mới bạn đã đặt trong code (DATABASE_VERSION = 2).
+
+        if (oldVersion < 2) {
+            // Nếu phiên bản cũ là 1, chúng ta cần thực hiện các thay đổi của phiên bản 2.
+            // Cụ thể là thêm cột is_expense vào cả hai bảng.
+            try {
+                db.execSQL("ALTER TABLE $TABLE_TRANSACTIONS ADD COLUMN $COLUMN_IS_EXPENSE INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE $TABLE_CATEGORIES ADD COLUMN $COLUMN_IS_EXPENSE_CATEGORY INTEGER NOT NULL DEFAULT 1")
+            } catch (e: android.database.sqlite.SQLiteException) {
+                // Ghi lại log lỗi nếu cần, nhưng không làm crash app.
+                // Lỗi có thể xảy ra nếu người dùng tự can thiệp DB,
+                // hoặc trong một số kịch bản nâng cấp phức tạp.
+                // Bỏ qua lỗi trong trường hợp này để app tiếp tục chạy.
+            }
+        }
+
+        // Nếu trong tương lai bạn có DATABASE_VERSION = 3, bạn sẽ viết thêm khối if ở đây:
+        // if (oldVersion < 3) {
+        //     // Thực hiện các thay đổi của phiên bản 3
+        //     db.execSQL("ALTER TABLE ...")
+        // }
     }
+
 
     // transaction methods
 
@@ -163,7 +186,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         // Query to sum the spending by category
         val cursor = db.rawQuery(
-            "SELECT $COLUMN_CATEGORY, SUM($COLUMN_AMOUNT) as total_spent FROM $TABLE_TRANSACTIONS WHERE $COLUMN_IS_EXPENSE = 1 GROUP BY $COLUMN_CATEGORY",
+            "SELECT $COLUMN_CATEGORY, SUM($COLUMN_AMOUNT) " +
+                    "as total_spent " +
+                    "FROM $TABLE_TRANSACTIONS " +
+                    "WHERE $COLUMN_IS_EXPENSE = 1 " +
+                    "GROUP BY $COLUMN_CATEGORY",
             null
         )
 
@@ -175,6 +202,30 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         cursor.close()
         return spendingMap
     }
+
+    // Hàm này tính tổng thu nhập cho mỗi category
+    fun calculateCategoryIncome(): Map<String, Float> {
+        val map = mutableMapOf<String, Float>()
+        val db = this.readableDatabase
+        // Thay đổi điều kiện WHERE isExpense = 0 để chỉ lấy các khoản THU
+        val cursor = db.rawQuery(
+            "SELECT $COLUMN_CATEGORY, SUM($COLUMN_AMOUNT) " +
+                    "as total_spent " +
+                    "FROM $TABLE_TRANSACTIONS " +
+                    "WHERE $COLUMN_IS_EXPENSE = 0 " +
+                    "GROUP BY $COLUMN_CATEGORY",
+            null)
+        if (cursor.moveToFirst()) {
+            do {
+                val category = cursor.getString(0)
+                val total = cursor.getFloat(1)
+                map[category] = total
+            } while (cursor.moveToNext())
+        }
+        cursor.close()
+        return map
+    }
+
 
     //update category
     fun updateCategory(category: Category): Int {
@@ -194,5 +245,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             arrayOf(category.name)
         )
     }
+
 
 }

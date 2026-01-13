@@ -60,7 +60,7 @@ class TransactionsFragment : Fragment() {
         // 3. LOAD DỮ LIỆU SAU (Lúc này Adapter đã có, nên gọi notify sẽ không bị lỗi)
         loadTransactions()
 
-        // 4. Các nút bấm khác
+        // 4. Nút thêm transaction
         val fabAdd: View = view.findViewById(R.id.fabAddTransaction)
         fabAdd.setOnClickListener {
             showAddTransactionDialog()
@@ -73,6 +73,10 @@ class TransactionsFragment : Fragment() {
         transactionAdapter.notifyDataSetChanged()
     }
 
+    /**
+     * Hàm hiển thị dialog để thêm/sửa giao dịch
+     *
+     */
     private fun showAddTransactionDialog(existingTransaction: Transaction? = null, position: Int? = null) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_transaction, null)
         val rbExpense = dialogView.findViewById<RadioButton>(R.id.rbExpense)
