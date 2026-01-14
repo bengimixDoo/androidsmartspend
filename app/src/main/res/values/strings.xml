@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">SmartSpend</string>
     <string name="smartspend">Smart Spend</string>
-    <string name="appline">Quản lý tài chính thông minh\nvà hiệu quả nhất</string>
+    <string name="appline">Quản lý tài chính thông minh</string>
     <string name="get_started">Bắt đầu</string>
 
     <string name="nav_home">Trang chủ</string>

@@ -27,10 +27,11 @@
         android:layout_marginEnd="56dp"
         android:text="@string/appline"
         android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.571"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnGetStarted" />
+        app:layout_constraintTop_toBottomOf="@+id/btnGetStarted"
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
         android:id="@+id/btnGetStarted"
