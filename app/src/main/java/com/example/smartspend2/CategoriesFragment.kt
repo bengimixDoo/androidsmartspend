@@ -50,18 +50,27 @@ class CategoriesFragment : Fragment() {
 
     private fun loadAndSyncCategories() {
         categories.clear()
-        categories.addAll(dbHelper.getAllCategories())
+        // 1. Lấy tất cả danh mục từ DB
+        val allCategories = dbHelper.getAllCategories()
 
         val spendingMap = dbHelper.calculateCategorySpending()
         val incomeMap = dbHelper.calculateCategoryIncome()
 
-        categories.forEach { category ->
+        // 2. Cập nhật số tiền đã chi/thu cho từng danh mục
+        allCategories.forEach { category ->
             if (category.isExpense) {
                 category.spentAmount = spendingMap[category.name] ?: 0f
             } else {
                 category.spentAmount = incomeMap[category.name] ?: 0f
             }
         }
+
+        // 3. Lọc danh sách: Chỉ hiển thị nếu (Là danh mục tự tạo) HOẶC (Có ngân sách) HOẶC (Có giao dịch)
+        val activeCategories = allCategories.filter { category ->
+            category.key.isNullOrEmpty() || category.allocatedAmount > 0f || category.spentAmount > 0f
+        }
+
+        categories.addAll(activeCategories)
         categoryAdapter.notifyDataSetChanged()
     }
 

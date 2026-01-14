@@ -94,10 +94,17 @@ class TransactionsFragment : Fragment() {
         val defaultExpenseCats = listOf(
             getString(R.string.cat_food), getString(R.string.cat_transport),
             getString(R.string.cat_bills), getString(R.string.cat_entertainment),
-            getString(R.string.cat_shopping), "Sức khỏe", "Giáo dục", getString(R.string.cat_other)
+            getString(R.string.cat_shopping), getString(R.string.cat_health),
+            getString(R.string.cat_education), getString(R.string.cat_other)
         )
         val defaultIncomeCats = listOf(
-            getString(R.string.cat_salary), "Thưởng", "Phụ cấp", "Đầu tư", "Bán hàng", "Được tặng", getString(R.string.cat_other)
+            getString(R.string.cat_salary),
+            getString(R.string.cat_bonus),
+            getString(R.string.cat_allowance),
+            getString(R.string.cat_investment),
+            getString(R.string.cat_selling),
+            getString(R.string.cat_gifted),
+            getString(R.string.cat_other)
         )
 
         // ... (Phần hàm updateCategorySpinner giữ nguyên) ...

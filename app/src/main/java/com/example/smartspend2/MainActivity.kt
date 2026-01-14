@@ -53,7 +53,14 @@ private val defaultCategoryDefinitions = listOf(
     DefaultCategoryInfo("cat_bills", R.string.cat_bills, true),
     DefaultCategoryInfo("cat_entertainment", R.string.cat_entertainment, true),
     DefaultCategoryInfo("cat_shopping", R.string.cat_shopping, true),
+    DefaultCategoryInfo("cat_health", R.string.cat_health, true),
+    DefaultCategoryInfo("cat_education", R.string.cat_education, true),
     DefaultCategoryInfo("cat_salary", R.string.cat_salary, false),
+    DefaultCategoryInfo("cat_bonus", R.string.cat_bonus, false),
+    DefaultCategoryInfo("cat_allowance", R.string.cat_allowance, false),
+    DefaultCategoryInfo("cat_investment", R.string.cat_investment, false),
+    DefaultCategoryInfo("cat_selling", R.string.cat_selling, false),
+    DefaultCategoryInfo("cat_gifted", R.string.cat_gifted, false),
     DefaultCategoryInfo("cat_other", R.string.cat_other, false) // "Khác" có thể dùng cho cả thu và chi
 )
 
