@@ -24,14 +24,12 @@ import java.util.Locale
 import androidx.core.graphics.toColorInt
 
 /**
- * Fragment chính của ứng dụng, hiển thị tổng quan tình hình tài chính.
+ * Fragment màn hình chính (Dashboard) của ứng dụng.
  *
- * Bao gồm:
- * - Một biểu đồ tròn (PieChart) thể hiện tỷ lệ chi tiêu theo từng danh mục.
- * - Một danh sách các chú thích (Legend) cho biểu đồ tròn.
- * - Một danh sách 5 giao dịch gần đây nhất.
- *
- * Dữ liệu sẽ được tự động làm mới mỗi khi người dùng quay lại màn hình này.
+ * Chịu trách nhiệm hiển thị:
+ * - Biểu đồ tròn (PieChart) tổng quan chi tiêu theo danh mục.
+ * - Danh sách chú thích (Legend) tương ứng với biểu đồ.
+ * - Danh sách 5 giao dịch gần nhất.
  */
 class HomeFragment : Fragment() {
 
@@ -41,6 +39,9 @@ class HomeFragment : Fragment() {
     private lateinit var dbHelper: DatabaseHelper
     private var transactions: MutableList<Transaction> = mutableListOf()
 
+    /**
+     * Khởi tạo View cho Fragment.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,6 +49,10 @@ class HomeFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_home, container, false)
     }
 
+    /**
+     * Được gọi ngay sau khi View đã được khởi tạo.
+     * Thực hiện ánh xạ View, cấu hình RecyclerView và tải dữ liệu ban đầu.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -64,13 +69,11 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Tải tất cả dữ liệu từ cơ sở dữ liệu và cập nhật giao diện người dùng.
+     * Tải dữ liệu từ Database và cập nhật toàn bộ UI.
      *
-     * Hàm này thực hiện các công việc sau:
-     * 1. Lấy toàn bộ giao dịch từ `DatabaseHelper`.
-     * 2. Sắp xếp các giao dịch theo ngày giảm dần và chỉ lấy 5 giao dịch gần nhất.
-     * 3. Cập nhật `RecyclerView` hiển thị các giao dịch gần đây.
-     * 4. Gọi hàm `setupPieChartAndLegend()` để vẽ lại biểu đồ và chú thích.
+     * Quy trình:
+     * 1. Lấy toàn bộ giao dịch, sắp xếp theo thời gian và hiển thị 5 giao dịch gần nhất.
+     * 2. Tính toán và vẽ biểu đồ tròn dựa trên dữ liệu chi tiêu.
      */
     private fun loadDataAndUpdateUI() {
         val allData = dbHelper.getAllTransactions()
@@ -86,14 +89,10 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Phân tích một chuỗi ngày tháng thành đối tượng [Date] để phục vụ việc sắp xếp.
+     * Chuyển đổi chuỗi ngày tháng sang đối tượng Date để sắp xếp.
      *
-     * Hàm này luôn sử dụng `Locale.ENGLISH` để phân tích vì dữ liệu ngày tháng
-     * trong cơ sở dữ liệu đã được chuẩn hóa theo định dạng này ("dd MMM yyyy").
-     *
-     * @param dateString Chuỗi ngày tháng cần phân tích (ví dụ: "15 Jan 2026").
-     * @return Một đối tượng [Date]. Nếu có lỗi, trả về một ngày trong quá khứ (epoch)
-     * để đảm bảo các mục bị lỗi sẽ được xếp xuống cuối danh sách.
+     * @param dateString Chuỗi ngày dạng "dd MMM yyyy" (Locale.ENGLISH).
+     * @return Đối tượng Date, hoặc Date(0) nếu lỗi định dạng (để xếp xuống cuối).
      */
     private fun parseDate(dateString: String): Date {
         return try {
@@ -105,11 +104,11 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Thiết lập và vẽ biểu đồ tròn (PieChart) cùng với danh sách chú thích (Legend).
+     * Cấu hình và hiển thị biểu đồ tròn (PieChart).
      *
-     * Hàm này lọc ra các giao dịch chi tiêu, nhóm chúng theo danh mục, tính tổng chi,
-     * sau đó cấu hình và hiển thị dữ liệu lên `PieChart` và `RecyclerView` chú thích.
-     * Nếu không có dữ liệu chi tiêu, biểu đồ sẽ hiển thị thông báo.
+     * - Lọc giao dịch chi tiêu.
+     * - Nhóm theo danh mục và tính tổng.
+     * - Cập nhật dữ liệu cho PieChart và LegendAdapter.
      */
     private fun setupPieChartAndLegend() {
         val expenseTransactions = transactions.filter { it.isExpense }
@@ -117,8 +116,8 @@ class HomeFragment : Fragment() {
         if (expenseTransactions.isEmpty()) {
             pieChart.clear()
             pieChart.setNoDataText("Chưa có giao dịch chi tiêu nào")
-            pieChart.invalidate() // Cập nhật để hiển thị chữ "No data"
-            rvLegend.adapter = LegendAdapter(emptyList()) // Xóa chú thích cũ
+            pieChart.invalidate()
+            rvLegend.adapter = LegendAdapter(emptyList())
             return
         }
 
@@ -132,7 +131,7 @@ class HomeFragment : Fragment() {
 
         val dataSet = PieDataSet(entries, "")
 
-        // Bảng màu có độ tương phản cao, dễ phân biệt
+        // Bảng màu tương phản cao cho các lát cắt
         val colors = listOf(
             "#E6194B".toColorInt(), // Đỏ
             "#3CB44B".toColorInt(), // Xanh lá
@@ -168,7 +167,7 @@ class HomeFragment : Fragment() {
         }
 
         val legendItems = entries.mapIndexed { index, pieEntry ->
-            // Lấy màu tương ứng từ danh sách, dùng toán tử `%` để lặp lại màu nếu hết
+            // Lặp lại màu nếu số lượng danh mục vượt quá số lượng màu
             val color = colors[index % colors.size]
             LegendItem(color, pieEntry.label)
         }
@@ -176,8 +175,7 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * Được gọi khi Fragment trở nên hữu hình với người dùng.
-     * Tải lại dữ liệu để đảm bảo giao diện luôn được cập nhật mới nhất.
+     * Cập nhật lại dữ liệu khi người dùng quay lại màn hình này.
      */
     override fun onResume() {
         super.onResume()

@@ -9,57 +9,81 @@ import com.example.smartspend2.models.Category
 import com.example.smartspend2.models.Transaction
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
+/**
+ * Activity chính của ứng dụng SmartSpend.
+ *
+ * Activity này đóng vai trò là container chứa các Fragment điều hướng chính (Home, Transactions, Categories, Reports).
+ * Nó chịu trách nhiệm thiết lập thanh điều hướng dưới đáy (BottomNavigationView) và khởi tạo dữ liệu ban đầu.
+ */
 class MainActivity : AppCompatActivity() {
+
+    /**
+     * Được gọi khi Activity được khởi tạo.
+     *
+     * @param savedInstanceState Trạng thái đã lưu của Activity (nếu có).
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 1. Tìm cái khung bản đồ (NavHostFragment) mà chúng ta vừa đặt tên mới trong XML
-        // Lưu ý: Phải dùng đúng ID R.id.nav_host_fragment
+        // Thiết lập NavHostFragment
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
 
-        // 2. Lấy trình điều khiển từ nó
+        // Lấy NavController để quản lý điều hướng
         val navController = navHostFragment.navController
 
-        // 3. Tìm cái thanh Menu dưới đáy
+        // Thiết lập BottomNavigationView
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
+        // Khởi tạo Database và dữ liệu mặc định
         val dbHelper = DatabaseHelper(this)
-        // 1. Đồng bộ tên các danh mục mặc định phòng trường hợp đổi ngôn ngữ
         syncDefaultCategoryNames(this, dbHelper)
-        // 2. Tạo các danh mục mặc định nếu chúng chưa tồn tại
         createDefaultCategoriesIfNeeded(this, dbHelper)
-        // Chỉ thêm dữ liệu giao dịch giả khi phát triển (nếu DB trống)
         addDummyData(dbHelper)
 
-        // 4. Dùng lệnh "thần thánh" này để tự động nối Menu với Màn hình
-        // (Nó sẽ tự biết bấm nút Home -> mở nav_home, bấm Reports -> mở nav_reports)
+        // Liên kết BottomNavigationView với NavController để tự động xử lý điều hướng
         bottomNav.setupWithNavController(navController)
     }
 }
 
 /**
- * Cấu trúc để định nghĩa một danh mục mặc định.
- * @param key Mã định danh không đổi, trùng với tên trong strings.xml (ví dụ: "cat_food").
- * @param nameResId ID của chuỗi trong strings.xml (ví dụ: R.string.cat_food).
- * @param isExpense Là danh mục chi tiêu hay thu nhập.
+ * Data class lưu trữ thông tin cấu hình cho các danh mục mặc định.
+ *
+ * @property key Khóa định danh duy nhất cho danh mục (dùng để đồng bộ đa ngôn ngữ).
+ * @property nameResId ID tài nguyên chuỗi (string resource) cho tên danh mục.
+ * @property isExpense Xác định danh mục này thuộc loại Chi tiêu (true) hay Thu nhập (false).
  */
 private data class DefaultCategoryInfo(val key: String, val nameResId: Int, val isExpense: Boolean)
 
+/**
+ * Danh sách định nghĩa các danh mục mặc định của ứng dụng.
+ */
 private val defaultCategoryDefinitions = listOf(
     DefaultCategoryInfo("cat_food", R.string.cat_food, true),
     DefaultCategoryInfo("cat_transport", R.string.cat_transport, true),
     DefaultCategoryInfo("cat_bills", R.string.cat_bills, true),
     DefaultCategoryInfo("cat_entertainment", R.string.cat_entertainment, true),
     DefaultCategoryInfo("cat_shopping", R.string.cat_shopping, true),
+    DefaultCategoryInfo("cat_health", R.string.cat_health, true),
+    DefaultCategoryInfo("cat_education", R.string.cat_education, true),
     DefaultCategoryInfo("cat_salary", R.string.cat_salary, false),
+    DefaultCategoryInfo("cat_bonus", R.string.cat_bonus, false),
+    DefaultCategoryInfo("cat_allowance", R.string.cat_allowance, false),
+    DefaultCategoryInfo("cat_investment", R.string.cat_investment, false),
+    DefaultCategoryInfo("cat_selling", R.string.cat_selling, false),
+    DefaultCategoryInfo("cat_gifted", R.string.cat_gifted, false),
     DefaultCategoryInfo("cat_other", R.string.cat_other, false) // "Khác" có thể dùng cho cả thu và chi
 )
 
 /**
- * Đồng bộ tên của các danh mục mặc định trong DB với file strings.xml hiện tại.
- * Rất quan trọng khi người dùng thay đổi ngôn ngữ của thiết bị.
+ * Đồng bộ tên của các danh mục mặc định trong cơ sở dữ liệu với ngôn ngữ hiện tại của thiết bị.
+ *
+ * Hàm này kiểm tra các danh mục có `key` (danh mục mặc định) và cập nhật tên hiển thị
+ * nếu ngôn ngữ hệ thống đã thay đổi so với lần lưu trước đó.
+ *
+ * @param context Context ứng dụng để truy cập tài nguyên.
+ * @param dbHelper Helper để thao tác với cơ sở dữ liệu.
  */
 private fun syncDefaultCategoryNames(context: Context, dbHelper: DatabaseHelper) {
     val defaultCategoriesFromDb = dbHelper.getAllCategories().filter { !it.key.isNullOrEmpty() }
@@ -80,8 +104,12 @@ private fun syncDefaultCategoryNames(context: Context, dbHelper: DatabaseHelper)
 }
 
 /**
- * Tạo các danh mục mặc định nếu chúng chưa tồn tại trong cơ sở dữ liệu.
- * Hàm này chỉ thực sự thêm dữ liệu trong lần chạy đầu tiên của ứng dụng.
+ * Tạo các danh mục mặc định trong cơ sở dữ liệu nếu chúng chưa tồn tại.
+ *
+ * Hàm này thường chỉ chạy trong lần khởi chạy đầu tiên của ứng dụng.
+ *
+ * @param context Context ứng dụng.
+ * @param dbHelper Helper để thao tác với cơ sở dữ liệu.
  */
 private fun createDefaultCategoriesIfNeeded(context: Context, dbHelper: DatabaseHelper) {
     // Kiểm tra xem đã có danh mục mặc định nào chưa bằng cách tìm key
@@ -100,9 +128,14 @@ private fun createDefaultCategoriesIfNeeded(context: Context, dbHelper: Database
     }
 }
 
-// Hàm tạo dữ liệu giao dịch giả lập (Dummy Data) để test
+/**
+ * Thêm dữ liệu giả lập (Dummy Data) vào cơ sở dữ liệu phục vụ mục đích kiểm thử/phát triển.
+ *
+ * Chỉ thêm dữ liệu nếu bảng giao dịch hiện tại đang trống.
+ *
+ * @param dbHelper Helper để thao tác với cơ sở dữ liệu.
+ */
 fun addDummyData(dbHelper: DatabaseHelper) {
-    // Nếu trong DB đã có giao dịch rồi thì thôi không thêm nữa (tránh trùng lặp)
     if (dbHelper.getAllTransactions().isNotEmpty()) return
     
     val dummyList = listOf(
