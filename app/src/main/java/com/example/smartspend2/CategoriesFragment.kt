@@ -105,7 +105,13 @@ class CategoriesFragment : Fragment() {
                 etCategoryName.error = if (name.isEmpty()) "Nhập tên danh mục" else null
                 etAllocatedAmount.error = if (allocatedAmount == null) "Nhập số tiền" else null
             } else {
-                val newCategory = Category(name, allocatedAmount!!, 0f, isExpense)
+                // SỬA LỖI BIÊN DỊCH: Sử dụng named arguments để tạo đối tượng Category
+                val newCategory = Category(
+                    name = name,
+                    allocatedAmount = allocatedAmount!!,
+                    spentAmount = 0f,
+                    isExpense = isExpense
+                )
                 val result = dbHelper.insertCategory(newCategory)
 
                 if (result != -1L) {
@@ -124,16 +130,22 @@ class CategoriesFragment : Fragment() {
     // HÀM ĐÃ ĐƯỢC SỬA LẠI ĐẦY ĐỦ
     // =====================================================================
     private fun showDeleteCategoryDialog(category: Category) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Xoá danh mục")
-            .setMessage("Ban chắc chắn muốn xoá danh mục '${category.name}' ?")
-            .setPositiveButton("Xoá") { _, _ ->
-                dbHelper.deleteCategory(category.name)
-                // Load lại toàn bộ để đồng bộ chính xác
-                loadAndSyncCategories()
-            }
-            .setNegativeButton("Huỷ bỏ", null)
-            .show()
+        // Kiểm tra xem danh mục có phải là danh mục mặc định hay không (dựa vào key).
+        if (!category.key.isNullOrEmpty()) {
+            // Nếu là mặc định, hiển thị thông báo và không cho xóa.
+            Toast.makeText(requireContext(), getString(R.string.cannot_delete_default_category), Toast.LENGTH_SHORT).show()
+        } else {
+            // Nếu là danh mục do người dùng tạo, hiển thị hộp thoại xác nhận xóa.
+            AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.delete_category_title))
+                .setMessage(getString(R.string.delete_category_message, category.name))
+                .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                    dbHelper.deleteCategory(category.name)
+                    loadAndSyncCategories()
+                }
+                .setNegativeButton(getString(R.string.cancel), null)
+                .show()
+        }
     }
 
     override fun onResume() {

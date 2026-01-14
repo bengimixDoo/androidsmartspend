@@ -31,11 +31,22 @@
     <string name="cat_bills">Hóa đơn</string>
     <string name="cat_entertainment">Giải trí</string>
     <string name="cat_shopping">Mua sắm</string>
+    <string name="cat_health">Sức khỏe</string>
+    <string name="cat_education">Giáo dục</string>
+
     <string name="cat_salary">Lương</string>
+    <string name="cat_bonus">Thưởng</string>
+    <string name="cat_allowance">Phụ cấp</string>
+    <string name="cat_investment">Đầu tư</string>
+    <string name="cat_selling">Bán hàng</string>
+    <string name="cat_gifted">Được tặng</string>
     <string name="cat_other">Khác</string>
 
     <string name="hello_blank_fragment">Xin chào</string>
     <string name="category">Danh mục</string>
+    <string name="cannot_delete_default_category">Không thể xóa danh mục mặc định.</string>
+    <string name="delete_category_title">Xoá danh mục</string>
+    <string name="delete_category_message">Bạn chắc chắn muốn xoá danh mục \'%1$s\'?</string>
     <string name="exampleDate">12/04/2025</string>
     <string name="transaction_title">Tên giao dịch</string>
     <string name="priceExample">100.000 đ</string>
@@ -43,6 +54,8 @@
     <string name="add">Thêm</string>
     <string name="title_add_transaction">THÊM GIAO DỊCH</string>
     <string name="btn_add_transaction">Thêm giao dịch</string>
+    <string name="delete">Xoá</string>
+    <string name="cancel">Huỷ bỏ</string>
     <string name="hint_date_format">Ngày (ví dụ: 14 Jan 2026)</string>
 
     <string name="title_add_category">THÊM DANH MỤC</string>

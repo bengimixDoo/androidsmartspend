@@ -12,7 +12,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
     companion object {
         private const val DATABASE_NAME = "smartspend.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 4 // Nâng cấp phiên bản DB lên 4
 
         // Transaction Table
         private const val TABLE_TRANSACTIONS = "transactions"
@@ -27,9 +27,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val TABLE_CATEGORIES = "categories"
         private const val COLUMN_CATEGORY_ID = "category_id"
         private const val COLUMN_CATEGORY_NAME = "name"
+        private const val COLUMN_CATEGORY_KEY = "category_key" // ĐỔI TÊN: Tránh từ khóa "key" của SQL
         private const val COLUMN_ALLOCATED_AMOUNT = "allocated_amount"
         private const val COLUMN_SPENT_AMOUNT = "spent_amount"
-        private const val COLUMN_IS_EXPENSE_CATEGORY = "is_expense"
+        private const val COLUMN_IS_EXPENSE_CATEGORY = "is_expense_category" // ĐỔI TÊN: Rõ nghĩa hơn
 
         // Create Table Queries
         private const val CREATE_TRANSACTIONS_TABLE = """
@@ -49,7 +50,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
                 $COLUMN_CATEGORY_NAME TEXT UNIQUE,
                 $COLUMN_ALLOCATED_AMOUNT REAL,
                 $COLUMN_SPENT_AMOUNT REAL,
-                $COLUMN_IS_EXPENSE_CATEGORY INTEGER
+                $COLUMN_IS_EXPENSE_CATEGORY INTEGER, 
+                $COLUMN_CATEGORY_KEY TEXT
             )
         """
     }
@@ -59,8 +61,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         db.execSQL(CREATE_CATEGORIES_TABLE)
     }
 
-    // THAY THẾ HÀM CŨ BẰNG HÀM NÀY
-
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Luôn kiểm tra phiên bản cũ để thực hiện nâng cấp đúng cách.
         // oldVersion là phiên bản database hiện tại trên máy người dùng.
@@ -68,10 +68,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
         if (oldVersion < 2) {
             // Nếu phiên bản cũ là 1, chúng ta cần thực hiện các thay đổi của phiên bản 2.
-            // Cụ thể là thêm cột is_expense vào cả hai bảng.
-            try {
-                db.execSQL("ALTER TABLE $TABLE_TRANSACTIONS ADD COLUMN $COLUMN_IS_EXPENSE INTEGER NOT NULL DEFAULT 1")
-                db.execSQL("ALTER TABLE $TABLE_CATEGORIES ADD COLUMN $COLUMN_IS_EXPENSE_CATEGORY INTEGER NOT NULL DEFAULT 1")
+            // Cụ thể là thêm cột is_expense vào cả hai bảng. Dùng tên cột cũ để đảm bảo di chuyển đúng.
+            try { 
+                db.execSQL("ALTER TABLE $TABLE_TRANSACTIONS ADD COLUMN is_expense INTEGER NOT NULL DEFAULT 1")
+                db.execSQL("ALTER TABLE $TABLE_CATEGORIES ADD COLUMN is_expense INTEGER NOT NULL DEFAULT 1")
             } catch (e: android.database.sqlite.SQLiteException) {
                 // Ghi lại log lỗi nếu cần, nhưng không làm crash app.
                 // Lỗi có thể xảy ra nếu người dùng tự can thiệp DB,
@@ -80,11 +80,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             }
         }
 
-        // Nếu trong tương lai bạn có DATABASE_VERSION = 3, bạn sẽ viết thêm khối if ở đây:
-        // if (oldVersion < 3) {
-        //     // Thực hiện các thay đổi của phiên bản 3
-        //     db.execSQL("ALTER TABLE ...")
-        // }
+        if (oldVersion < 3) {
+            // Nâng cấp từ v2 lên v3: Thêm cột `key` vào bảng categories
+            try {
+                db.execSQL("ALTER TABLE $TABLE_CATEGORIES ADD COLUMN $COLUMN_CATEGORY_KEY TEXT")
+            } catch (e: android.database.sqlite.SQLiteException) {
+                // Bỏ qua lỗi nếu cột đã tồn tại
+            }
+        }
+
+        if (oldVersion < 4) {
+            // Nâng cấp từ v3 lên v4: Đổi tên cột "is_expense" thành "is_expense_category" trong bảng categories
+            try {
+                db.execSQL("ALTER TABLE $TABLE_CATEGORIES RENAME COLUMN is_expense TO $COLUMN_IS_EXPENSE_CATEGORY")
+            } catch (e: android.database.sqlite.SQLiteException) {
+                // Bỏ qua lỗi nếu cột đã được đổi tên hoặc không tồn tại
+            }
+        }
     }
 
 
@@ -152,6 +164,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_ALLOCATED_AMOUNT, category.allocatedAmount)
             put(COLUMN_SPENT_AMOUNT, category.spentAmount)
             put(COLUMN_IS_EXPENSE_CATEGORY, if (category.isExpense) 1 else 0)
+            put(COLUMN_CATEGORY_KEY, category.key)
         }
         return db.insert(TABLE_CATEGORIES, null, values)
     }
@@ -162,11 +175,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         val categories = mutableListOf<Category>()
 
         while (cursor.moveToNext()) {
+            val keyIndex = cursor.getColumnIndex(COLUMN_CATEGORY_KEY)
+            val key = if (keyIndex != -1 && !cursor.isNull(keyIndex)) cursor.getString(keyIndex) else null
             val category = Category(
+                id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_ID)),
                 name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME)),
                 allocatedAmount = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_ALLOCATED_AMOUNT)),
                 spentAmount = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_SPENT_AMOUNT)),
-                isExpense = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_EXPENSE_CATEGORY)) == 1
+                isExpense = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_EXPENSE_CATEGORY)) == 1,
+                key = key
             )
             categories.add(category)
         }
@@ -235,14 +252,14 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_ALLOCATED_AMOUNT, category.allocatedAmount)
             put(COLUMN_SPENT_AMOUNT, category.spentAmount)
             put(COLUMN_IS_EXPENSE_CATEGORY, if (category.isExpense) 1 else 0)
-        }
+        } // Không cập nhật key vì nó là định danh cố định
 
-        // Update the category where the name matches
+        // Cập nhật danh mục dựa trên ID
         return db.update(
             TABLE_CATEGORIES,
             values,
-            "$COLUMN_CATEGORY_NAME = ?",
-            arrayOf(category.name)
+            "$COLUMN_CATEGORY_ID = ?",
+            arrayOf(category.id.toString())
         )
     }
 
@@ -262,11 +279,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         )
 
         while (cursor.moveToNext()) {
+            val keyIndex = cursor.getColumnIndex(COLUMN_CATEGORY_KEY)
+            val key = if (keyIndex != -1 && !cursor.isNull(keyIndex)) cursor.getString(keyIndex) else null
             val category = Category(
+                id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_ID)),
                 name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY_NAME)),
                 allocatedAmount = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_ALLOCATED_AMOUNT)),
                 spentAmount = cursor.getFloat(cursor.getColumnIndexOrThrow(COLUMN_SPENT_AMOUNT)),
-                isExpense = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_EXPENSE_CATEGORY)) == 1
+                isExpense = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_EXPENSE_CATEGORY)) == 1,
+                key = key
             )
             categories.add(category)
         }

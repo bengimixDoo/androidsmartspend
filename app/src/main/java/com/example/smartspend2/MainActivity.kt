@@ -1,9 +1,11 @@
 package com.example.smartspend2
 
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.example.smartspend2.models.Category
 import com.example.smartspend2.models.Transaction
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -24,8 +26,10 @@ class MainActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
         val dbHelper = DatabaseHelper(this)
-        // Luôn tạo các danh mục mặc định nếu chúng chưa tồn tại
-        createDefaultCategoriesIfNeeded(dbHelper)
+        // 1. Đồng bộ tên các danh mục mặc định phòng trường hợp đổi ngôn ngữ
+        syncDefaultCategoryNames(this, dbHelper)
+        // 2. Tạo các danh mục mặc định nếu chúng chưa tồn tại
+        createDefaultCategoriesIfNeeded(this, dbHelper)
         // Chỉ thêm dữ liệu giao dịch giả khi phát triển (nếu DB trống)
         addDummyData(dbHelper)
 
@@ -35,24 +39,63 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-// Hàm này chỉ chạy MỘT LẦN để tạo các danh mục cơ bản cho người dùng mới
-fun createDefaultCategoriesIfNeeded(dbHelper: DatabaseHelper) {
-    // Nếu trong DB đã có danh mục rồi thì thôi không thêm nữa (tránh trùng lặp)
-    if (dbHelper.getAllCategories().isNotEmpty()) return
+/**
+ * Cấu trúc để định nghĩa một danh mục mặc định.
+ * @param key Mã định danh không đổi, trùng với tên trong strings.xml (ví dụ: "cat_food").
+ * @param nameResId ID của chuỗi trong strings.xml (ví dụ: R.string.cat_food).
+ * @param isExpense Là danh mục chi tiêu hay thu nhập.
+ */
+private data class DefaultCategoryInfo(val key: String, val nameResId: Int, val isExpense: Boolean)
 
-    // Thêm các danh mục mặc định
-    val defaultCategories = listOf(
-        // --- DANH MỤC CHI (EXPENSE) ---
-        com.example.smartspend2.models.Category(name = "Food", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
-        com.example.smartspend2.models.Category(name = "Transport", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
-        com.example.smartspend2.models.Category(name = "Bills", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
-        com.example.smartspend2.models.Category(name = "Entertainment", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
-        com.example.smartspend2.models.Category(name = "Shopping", allocatedAmount = 0f, spentAmount = 0f, isExpense = true),
-        // --- DANH MỤC THU (INCOME) ---
-        com.example.smartspend2.models.Category(name = "Salary", allocatedAmount = 0f, spentAmount = 0f, isExpense = false),
-        com.example.smartspend2.models.Category(name = "Other", allocatedAmount = 0f, spentAmount = 0f, isExpense = false)
-    )
-    for (category in defaultCategories) {
+private val defaultCategoryDefinitions = listOf(
+    DefaultCategoryInfo("cat_food", R.string.cat_food, true),
+    DefaultCategoryInfo("cat_transport", R.string.cat_transport, true),
+    DefaultCategoryInfo("cat_bills", R.string.cat_bills, true),
+    DefaultCategoryInfo("cat_entertainment", R.string.cat_entertainment, true),
+    DefaultCategoryInfo("cat_shopping", R.string.cat_shopping, true),
+    DefaultCategoryInfo("cat_salary", R.string.cat_salary, false),
+    DefaultCategoryInfo("cat_other", R.string.cat_other, false) // "Khác" có thể dùng cho cả thu và chi
+)
+
+/**
+ * Đồng bộ tên của các danh mục mặc định trong DB với file strings.xml hiện tại.
+ * Rất quan trọng khi người dùng thay đổi ngôn ngữ của thiết bị.
+ */
+private fun syncDefaultCategoryNames(context: Context, dbHelper: DatabaseHelper) {
+    val defaultCategoriesFromDb = dbHelper.getAllCategories().filter { !it.key.isNullOrEmpty() }
+    if (defaultCategoriesFromDb.isEmpty()) return // Chưa có gì để đồng bộ
+
+    defaultCategoriesFromDb.forEach { categoryInDb ->
+        // Lấy ID của resource string từ key đã lưu trong DB
+        val resId = context.resources.getIdentifier(categoryInDb.key, "string", context.packageName)
+        if (resId != 0) {
+            val currentName = context.getString(resId)
+            // Nếu tên trong DB khác với tên theo ngôn ngữ hiện tại -> Cập nhật lại
+            if (categoryInDb.name != currentName) {
+                val updatedCategory = categoryInDb.copy(name = currentName)
+                dbHelper.updateCategory(updatedCategory)
+            }
+        }
+    }
+}
+
+/**
+ * Tạo các danh mục mặc định nếu chúng chưa tồn tại trong cơ sở dữ liệu.
+ * Hàm này chỉ thực sự thêm dữ liệu trong lần chạy đầu tiên của ứng dụng.
+ */
+private fun createDefaultCategoriesIfNeeded(context: Context, dbHelper: DatabaseHelper) {
+    // Kiểm tra xem đã có danh mục mặc định nào chưa bằng cách tìm key
+    val hasDefaults = dbHelper.getAllCategories().any { !it.key.isNullOrEmpty() }
+    if (hasDefaults) return
+
+    defaultCategoryDefinitions.forEach { info ->
+        val category = Category(
+            name = context.getString(info.nameResId),
+            allocatedAmount = 0f,
+            spentAmount = 0f,
+            isExpense = info.isExpense,
+            key = info.key
+        )
         dbHelper.insertCategory(category)
     }
 }

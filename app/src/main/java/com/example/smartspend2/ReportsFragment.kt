@@ -13,10 +13,9 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.example.smartspend2.adapters.CategoryReportAdapter
 import com.example.smartspend2.adapters.CategoryReportItem
-import com.example.smartspend2.adapters.TopSpendingAdapter
-import com.example.smartspend2.adapters.TopSpendingItem
 import com.example.smartspend2.models.Transaction
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
@@ -36,9 +35,9 @@ class ReportsFragment : Fragment() {
     private lateinit var tvIncome: TextView
     private lateinit var tvExpense: TextView
     private lateinit var tvBalance: TextView
-    private lateinit var rvTopSpending: RecyclerView
     private lateinit var barChart: BarChart
     private lateinit var rvCategoryReport: RecyclerView
+    private lateinit var topSpendingChart: HorizontalBarChart
 
     // --- CÁC VIEW MỚI CHO LINE CHART ---
     private lateinit var spinnerCategoryTrend: Spinner
@@ -63,16 +62,15 @@ class ReportsFragment : Fragment() {
         tvIncome = view.findViewById(R.id.tvTotalIncome)
         tvExpense = view.findViewById(R.id.tvTotalExpense)
         tvBalance = view.findViewById(R.id.tvNetBalance)
-        rvTopSpending = view.findViewById(R.id.rvTopSpending)
         barChart = view.findViewById(R.id.barChartTrend)
         rvCategoryReport = view.findViewById(R.id.rvCategoryReport)
+        topSpendingChart = view.findViewById(R.id.topSpendingChart)
 
         // Ánh xạ mới
         spinnerCategoryTrend = view.findViewById(R.id.spinnerCategoryTrend)
         lineChart = view.findViewById(R.id.lineChartCategory)
 
         // Cấu hình RecyclerView
-        rvTopSpending.layoutManager = LinearLayoutManager(requireContext())
         rvCategoryReport.layoutManager = LinearLayoutManager(requireContext())
         rvCategoryReport.isNestedScrollingEnabled = false
 
@@ -287,17 +285,82 @@ class ReportsFragment : Fragment() {
         tvBalance.setTextColor(if (balance >= 0) Color.parseColor("#4ECDC4") else Color.parseColor("#FF6B6B"))
 
         val expenseTransactions = transactions.filter { it.isExpense }
-        updateTopSpendingList(expenseTransactions)
+        setupTopSpendingChart(expenseTransactions)
         updateCategoryReportList(expenseTransactions)
     }
 
-    private fun updateTopSpendingList(expenseList: List<Transaction>) {
+    private fun setupTopSpendingChart(expenseList: List<Transaction>) {
+        if (expenseList.isEmpty()) {
+            topSpendingChart.clear()
+            topSpendingChart.setNoDataText("Không có dữ liệu chi tiêu")
+            topSpendingChart.invalidate()
+            return
+        }
+
+        // Lấy top 5 và đảo ngược lại để mục lớn nhất hiển thị ở trên cùng
         val topList = expenseList
             .groupBy { it.category }
-            .map { (cat, list) -> TopSpendingItem(cat, list.sumOf { it.amount.toDouble() }.toFloat()) }
-            .sortedByDescending { it.amount }
+            .map { (cat, list) -> cat to list.sumOf { it.amount.toDouble() }.toFloat() }
+            .sortedByDescending { it.second }
             .take(5)
-        rvTopSpending.adapter = TopSpendingAdapter(topList)
+            .reversed()
+
+        if (topList.isEmpty()) {
+            topSpendingChart.clear()
+            topSpendingChart.setNoDataText("Không có dữ liệu chi tiêu")
+            topSpendingChart.invalidate()
+            return
+        }
+
+        val entries = mutableListOf<BarEntry>()
+        val labels = mutableListOf<String>()
+
+        topList.forEachIndexed { index, (category, amount) ->
+            entries.add(BarEntry(index.toFloat(), amount))
+            labels.add(category)
+        }
+
+        val dataSet = BarDataSet(entries, "Top Chi tiêu")
+        dataSet.color = Color.parseColor("#F58231") // Màu cam
+        dataSet.valueTextSize = 10f
+        dataSet.valueTextColor = Color.parseColor("#202B3C")
+        dataSet.valueFormatter = object : ValueFormatter() {
+            private val format = DecimalFormat("#,###")
+            override fun getFormattedValue(value: Float): String {
+                if (value == 0f) return ""
+                return format.format(value)
+            }
+        }
+
+        val data = BarData(dataSet)
+        data.barWidth = 0.6f
+        topSpendingChart.data = data
+
+        // Cấu hình trục X (trục dọc chứa tên danh mục)
+        val xAxis = topSpendingChart.xAxis
+        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+        xAxis.position = XAxis.XAxisPosition.BOTTOM // Hiển thị label bên trái
+        xAxis.granularity = 1f
+        xAxis.setDrawGridLines(false)
+        xAxis.setDrawAxisLine(false)
+        xAxis.textSize = 12f
+
+        // --- GIẢI PHÁP MỚI: Tự động điều chỉnh khoảng trống ở cuối thanh dài nhất ---
+        // Cách này sẽ tính toán giá trị lớn nhất trong dữ liệu và tăng giới hạn của trục giá trị lên một chút (ví dụ 20%).
+        // Điều này tạo ra một "vùng đệm" tỷ lệ thuận với dữ liệu, hoạt động tốt trên mọi màn hình và mọi bộ dữ liệu.
+        val leftAxis = topSpendingChart.axisLeft
+        leftAxis.axisMinimum = 0f
+        val maxAmount = topList.maxOfOrNull { it.second } ?: 0f
+        // Thêm 20% khoảng đệm vào giá trị lớn nhất.
+        // Nếu không có dữ liệu, đặt một giá trị mặc định để tránh lỗi.
+        leftAxis.axisMaximum = if (maxAmount > 0) maxAmount * 1.2f else 100f
+        leftAxis.isEnabled = false // Ẩn trục giá trị đi cho gọn
+
+        topSpendingChart.axisRight.isEnabled = false
+        topSpendingChart.description.isEnabled = false
+        topSpendingChart.legend.isEnabled = false
+        topSpendingChart.setTouchEnabled(false)
+        topSpendingChart.invalidate()
     }
 
     private fun updateCategoryReportList(expenseList: List<Transaction>) {

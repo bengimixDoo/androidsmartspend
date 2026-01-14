@@ -1,4 +1,3 @@
-// Dán toàn bộ nội dung này vào file D:/BT/Android_Studio/androidsmartspend/app/src/main/java/com/example/smartspend2/HomeFragment.kt
 package com.example.smartspend2
 
 import android.graphics.Color
@@ -22,13 +21,23 @@ import com.github.mikephil.charting.data.PieEntry
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.core.graphics.toColorInt
 
+/**
+ * Fragment chính của ứng dụng, hiển thị tổng quan tình hình tài chính.
+ *
+ * Bao gồm:
+ * - Một biểu đồ tròn (PieChart) thể hiện tỷ lệ chi tiêu theo từng danh mục.
+ * - Một danh sách các chú thích (Legend) cho biểu đồ tròn.
+ * - Một danh sách 5 giao dịch gần đây nhất.
+ *
+ * Dữ liệu sẽ được tự động làm mới mỗi khi người dùng quay lại màn hình này.
+ */
 class HomeFragment : Fragment() {
 
     private lateinit var pieChart: PieChart
     private lateinit var rvTransactions: RecyclerView
-    private lateinit var rvLegend: RecyclerView // RecyclerView mới cho chú thích
-
+    private lateinit var rvLegend: RecyclerView
     private lateinit var dbHelper: DatabaseHelper
     private var transactions: MutableList<Transaction> = mutableListOf()
 
@@ -44,26 +53,30 @@ class HomeFragment : Fragment() {
 
         dbHelper = DatabaseHelper(requireContext())
 
-        // Ánh xạ các View
         pieChart = view.findViewById(R.id.pieChart)
         rvTransactions = view.findViewById(R.id.rvTransactions)
-        rvLegend = view.findViewById(R.id.rvLegend) // Ánh xạ RecyclerView chú thích
+        rvLegend = view.findViewById(R.id.rvLegend)
 
-        // Cấu hình RecyclerView cho chú thích, hiển thị 2 cột
         rvLegend.layoutManager = GridLayoutManager(requireContext(), 2)
-
-        // Cấu hình RecyclerView cho danh sách giao dịch
         rvTransactions.layoutManager = LinearLayoutManager(requireContext())
 
         loadDataAndUpdateUI()
     }
 
+    /**
+     * Tải tất cả dữ liệu từ cơ sở dữ liệu và cập nhật giao diện người dùng.
+     *
+     * Hàm này thực hiện các công việc sau:
+     * 1. Lấy toàn bộ giao dịch từ `DatabaseHelper`.
+     * 2. Sắp xếp các giao dịch theo ngày giảm dần và chỉ lấy 5 giao dịch gần nhất.
+     * 3. Cập nhật `RecyclerView` hiển thị các giao dịch gần đây.
+     * 4. Gọi hàm `setupPieChartAndLegend()` để vẽ lại biểu đồ và chú thích.
+     */
     private fun loadDataAndUpdateUI() {
         val allData = dbHelper.getAllTransactions()
         transactions.clear()
         transactions.addAll(allData)
 
-        // Sắp xếp các giao dịch theo ngày tháng, giao dịch mới nhất lên đầu
         val recentTransactions = transactions.sortedByDescending { transaction ->
             parseDate(transaction.date)
         }.take(5)
@@ -72,20 +85,33 @@ class HomeFragment : Fragment() {
         setupPieChartAndLegend()
     }
 
-    // Hàm phụ trợ để chuyển đổi chuỗi ngày tháng thành đối tượng Date để sắp xếp
+    /**
+     * Phân tích một chuỗi ngày tháng thành đối tượng [Date] để phục vụ việc sắp xếp.
+     *
+     * Hàm này luôn sử dụng `Locale.ENGLISH` để phân tích vì dữ liệu ngày tháng
+     * trong cơ sở dữ liệu đã được chuẩn hóa theo định dạng này ("dd MMM yyyy").
+     *
+     * @param dateString Chuỗi ngày tháng cần phân tích (ví dụ: "15 Jan 2026").
+     * @return Một đối tượng [Date]. Nếu có lỗi, trả về một ngày trong quá khứ (epoch)
+     * để đảm bảo các mục bị lỗi sẽ được xếp xuống cuối danh sách.
+     */
     private fun parseDate(dateString: String): Date {
         return try {
-            // Luôn phân tích ngày tháng theo định dạng tiếng Anh vì đó là cách
-            // dữ liệu được lưu nhất quán trong cơ sở dữ liệu.
             SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH).parse(dateString)
         } catch (e: Exception) {
             Log.e("HomeFragment", "Lỗi không thể phân tích ngày: '$dateString'", e)
-            Date(0) // Nếu lỗi, trả về một ngày cũ để xếp xuống cuối
+            Date(0)
         }
     }
 
+    /**
+     * Thiết lập và vẽ biểu đồ tròn (PieChart) cùng với danh sách chú thích (Legend).
+     *
+     * Hàm này lọc ra các giao dịch chi tiêu, nhóm chúng theo danh mục, tính tổng chi,
+     * sau đó cấu hình và hiển thị dữ liệu lên `PieChart` và `RecyclerView` chú thích.
+     * Nếu không có dữ liệu chi tiêu, biểu đồ sẽ hiển thị thông báo.
+     */
     private fun setupPieChartAndLegend() {
-        // Lấy các giao dịch CHI để vẽ biểu đồ
         val expenseTransactions = transactions.filter { it.isExpense }
 
         if (expenseTransactions.isEmpty()) {
@@ -96,7 +122,6 @@ class HomeFragment : Fragment() {
             return
         }
 
-        // Nhóm theo danh mục và tính tổng
         val categoryTotals = expenseTransactions
             .groupBy { it.category }
             .mapValues { entry -> entry.value.sumOf { it.amount.toDouble() } }
@@ -107,58 +132,55 @@ class HomeFragment : Fragment() {
 
         val dataSet = PieDataSet(entries, "")
 
-        // Danh sách màu sắc phong phú
+        // Bảng màu có độ tương phản cao, dễ phân biệt
         val colors = listOf(
-            Color.parseColor("#FF6B6B"), Color.parseColor("#4ECDC4"), Color.parseColor("#FFD166"),
-            Color.parseColor("#118AB2"), Color.parseColor("#06D6A0"), Color.parseColor("#7E57C2"),
-            Color.parseColor("#EF5350")
+            "#E6194B".toColorInt(), // Đỏ
+            "#3CB44B".toColorInt(), // Xanh lá
+            "#FFE119".toColorInt(), // Vàng
+            "#4363D8".toColorInt(), // Xanh dương
+            "#F58231".toColorInt(), // Cam
+            "#911EB4".toColorInt(), // Tím
+            "#42D4F4".toColorInt()  // Xanh lơ
         )
         dataSet.colors = colors
         dataSet.sliceSpace = 2f
         dataSet.selectionShift = 5f
-
-        // ** Tắt các chữ vẽ trên biểu đồ cho sạch sẽ **
         dataSet.setDrawValues(false)
 
         val data = PieData(dataSet)
 
-        // --- Cấu hình PieChart ---
         pieChart.apply {
             this.data = data
             setUsePercentValues(true)
             description.isEnabled = false
-
-            // ** TẮT CHÚ THÍCH MẶC ĐỊNH **
             legend.isEnabled = false
-
-            // ** Tắt tên các mục vẽ trên biểu đồ **
             setDrawEntryLabels(false)
 
-            // Cấu hình "lỗ" ở giữa
             isDrawHoleEnabled = true
             setHoleColor(Color.TRANSPARENT)
             transparentCircleRadius = 55f
             holeRadius = 50f
-            setCenterText("Chi tiêu")
+            centerText = "Chi tiêu"
             setCenterTextSize(18f)
-            setCenterTextColor(Color.parseColor("#202B3C"))
+            setCenterTextColor("#202B3C".toColorInt())
 
-            // Vẽ lại biểu đồ
             invalidate()
         }
 
-        // --- CẬP NHẬT RecyclerView CHÚ THÍCH (Legend) ---
         val legendItems = entries.mapIndexed { index, pieEntry ->
-            // Lấy màu tương ứng từ list `colors`, dùng toán tử `%` để lặp lại màu nếu hết
+            // Lấy màu tương ứng từ danh sách, dùng toán tử `%` để lặp lại màu nếu hết
             val color = colors[index % colors.size]
             LegendItem(color, pieEntry.label)
         }
         rvLegend.adapter = LegendAdapter(legendItems)
     }
 
+    /**
+     * Được gọi khi Fragment trở nên hữu hình với người dùng.
+     * Tải lại dữ liệu để đảm bảo giao diện luôn được cập nhật mới nhất.
+     */
     override fun onResume() {
         super.onResume()
-        // Tự động cập nhật dữ liệu mỗi khi quay lại màn hình này
         loadDataAndUpdateUI()
     }
 }
