@@ -1,6 +1,6 @@
 # SmartSpend - Quản lý Tài chính Cá nhân Thông minh
 
-![SmartSpend Banner](app/src/main/res/layout/ic_image.png)
+![SmartSpend Banner](app/src/main/res/drawable/ic_image.png)
 **SmartSpend** là ứng dụng Android giúp người dùng theo dõi thu chi, lập ngân sách và quản lý tài chính cá nhân một cách hiệu quả và trực quan. Ứng dụng được phát triển bằng ngôn ngữ **Kotlin**, sử dụng kiến trúc **MVVM** (cơ bản) và **SQLite** để lưu trữ dữ liệu offline.
 
 ## 🚀 Tính năng nổi bật
