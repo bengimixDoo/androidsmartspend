@@ -1,113 +1,57 @@
-# 💰 SmartSpend — Personal Finance Tracker
+# SmartSpend - Quản lý Tài chính Cá nhân Thông minh
 
-**SmartSpend** is a simple yet powerful Android application I designed to help users track their daily expenses, manage budgets, and gain better control over their personal finances. With an intuitive interface and insightful analytics, SmartSpend makes money management effortless and accessible.
+![SmartSpend Banner](app/src/main/res/layout/ic_image.png)
+**SmartSpend** là ứng dụng Android giúp người dùng theo dõi thu chi, lập ngân sách và quản lý tài chính cá nhân một cách hiệu quả và trực quan. Ứng dụng được phát triển bằng ngôn ngữ **Kotlin**, sử dụng kiến trúc **MVVM** (cơ bản) và **SQLite** để lưu trữ dữ liệu offline.
 
----
+## 🚀 Tính năng nổi bật
 
-## 📱 Features
+### 1. Quản lý Giao dịch (Transactions)
+* ✅ **Thêm/Sửa/Xóa giao dịch:** Ghi chép nhanh chóng các khoản thu nhập và chi tiêu.
+* ✅ **Phân loại đa dạng:** Hỗ trợ các danh mục mặc định (Ăn uống, Di chuyển, Lương...) và cho phép người dùng tự tạo danh mục mới.
+* ✅ **Chọn ngày linh hoạt:** Lựa chọn ngày tháng giao dịch dễ dàng.
 
-* **💸 Expense Tracking:** Quickly record daily expenses and categorize them (e.g., food, travel, bills, shopping).
-* **📊 Budget Planning:** Set monthly budgets and monitor how much you’ve spent versus how much remains.
-* **🏷️ Categorized Spending:** View spending by category to easily identify where your money goes.
-* **🔔 Smart Reminders:** Receive alerts when your spending in any category approaches or exceeds its set limit.
-* **☁️ Data Backup:** Option to back up your financial data locally or via cloud storage.
-* **🎨 Clean UI:** Minimal, responsive, and user-friendly interface with light and dark themes.
+### 2. Báo cáo & Thống kê (Reports & Analytics)
+* 📊 **Tổng quan:** Hiển thị Tổng thu, Tổng chi và Số dư hiện tại ngay trên màn hình chính.
+* 📈 **Biểu đồ Xu hướng (Trend Chart):** Biểu đồ cột so sánh Thu/Chi trong 6 tháng gần nhất.
+* 📉 **Xu hướng Danh mục (Category Trend):** Biểu đồ đường theo dõi biến động chi tiêu của từng danh mục cụ thể.
+* 🏆 **Top Chi tiêu:** Tự động liệt kê 5 danh mục tiêu tốn nhiều tiền nhất.
+* 📋 **Chi tiết Danh mục:** Xem lịch sử giao dịch chi tiết của từng nhóm chi tiêu.
 
----
+### 3. Quản lý Ngân sách & Cảnh báo (Budget & Notifications)
+* 💰 **Thiết lập ngân sách:** Đặt hạn mức chi tiêu cho từng danh mục.
+* 🔔 **Cảnh báo thông minh:** Hệ thống tự động gửi thông báo (Notification) khi bạn tiêu vượt quá 80%, 90% hoặc 100% ngân sách đã đặt.
 
-## 🧠 Motivation
-
-Managing finances can be overwhelming, especially for students or young professionals. **SmartSpend** was built to simplify this process — making it easier to track spending, understand financial habits, and make informed decisions about where your money goes.
-
----
-
-## ⚙️ Tech Stack
-
-* **Language:** Kotlin / Java
-* **Framework:** Android SDK
-* **Database:** Room / SQLite
-* **Architecture:** MVVM (Model–View–ViewModel)
-* **UI:** Material Design Components
-* **Notifications:** Android AlarmManager & WorkManager
+### 4. Giao diện thân thiện
+* Hỗ trợ hiển thị Tiếng Việt.
+* Giao diện Material Design hiện đại, dễ sử dụng.
 
 ---
 
-## 🚀 Installation
+## 🛠 Công nghệ sử dụng
 
-1. **Clone the repository**
-
-   ```bash
-   git clone https://github.com/yourusername/SmartSpend.git
-   ```
-2. **Open in Android Studio**
-
-   * Open the project in **Android Studio**.
-3. **Build & Run**
-
-   * Connect your Android device or use an emulator.
-   * Click **Run ▶️** to launch SmartSpend.
+* **Ngôn ngữ:** [Kotlin](https://kotlinlang.org/)
+* **IDE:** Android Studio
+* **Cơ sở dữ liệu:** SQLite (sử dụng `SQLiteOpenHelper`)
+* **Biểu đồ:** [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart) - Thư viện vẽ biểu đồ mạnh mẽ.
+* **Giao diện:** XML Layouts, RecyclerView, ConstraintLayout.
 
 ---
 
-## 📂 Project Structure
+## ⚙️ Cài đặt & Chạy ứng dụng
 
-```
-SmartSpend/
-│
-├── app/
-│   ├── java/com/smartspend/...
-│   │   ├── ui/               # Activities, Fragments, Adapters
-│   │   ├── data/             # Models, DAOs, Room Database
-│   │   ├── viewmodel/        
-│   │   └── utils/            # Helpers and constants
-│   └── res/                  # Layouts, Drawables, Strings, Themes
-│
-├── build.gradle
-├── README.md
-└── LICENSE
-```
+Để chạy dự án này trên máy local của bạn:
 
+1.  **Clone dự án:**
+    ```bash
+    git clone [https://github.com/bengimixDoo/androidsmartspend.git](https://github.com/bengimixDoo/androidsmartspend.git)
+    ```
+2.  **Mở trong Android Studio:**
+   * Khởi động Android Studio -> Open -> Chọn thư mục vừa clone.
+3.  **Đồng bộ Gradle:**
+   * Đợi Android Studio tải các thư viện cần thiết.
+4.  **Chạy ứng dụng:**
+   * Kết nối thiết bị thật hoặc mở máy ảo (Emulator).
+   * Nhấn nút **Run** (biểu tượng tam giác xanh).
 ---
 
-## 🖼️ Screenshots
-
-| Get Started Page                   | Dashboard                              | Transactions                   |
-| ---------------------------------- | -------------------------------------- | ------------------------------ |
-| ![App Screenshot](assets/1.png)    |   ![App Screenshot](assets/2.png)      |![App Screenshot](assets/3.png) |
-
-| Add Transaction                    |  Add Transaction                       | Transaction Options                |
-| ---------------------------------- | -------------------------------------- | ---------------------------------- |
-| ![App Screenshot](assets/4.png)    |   ![App Screenshot](assets/5.png)      | ![App Screenshot](assets/6.png)    |
-
-| Add Category                       | Delete Category                        | Categories + Warning Notifications |
-| ---------------------------------- | -------------------------------------- | ---------------------------------- |
-| ![App Screenshot](assets/7.png)    |   ![App Screenshot](assets/9.png)      | ![App Screenshot](assets/8.png)    |
-
-
-
-
-
-
----
-
-## 🔒 Privacy & Data
-
-SmartSpend stores all user data securely on the device (or optionally in the cloud). No personal or financial data is shared with third parties.
-
----
-
-## 🧩 Future Enhancements
-
-* 💳 Integration with bank APIs for automatic expense tracking
-* 🌐 Cloud sync across multiple devices
-* 📥 Export reports as PDF/CSV
-* 🤖 AI-based spending recommendations
-
----
-
-## 👨‍💻 Developed By
-
-**Nithmi Randunuge**
-📧 [[itz.nithmi@gmail.com](mailto:itz.nithmi@gmail.com)]
-🧾 Project for [SLIIT - Mobile Application Development IT2010]
-📅 Year: 2025
+*Dự án được thực hiện cho mục đích học tập.*
