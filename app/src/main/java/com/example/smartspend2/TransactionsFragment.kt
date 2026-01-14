@@ -89,35 +89,6 @@ class TransactionsFragment : Fragment() {
         val etDate = dialogView.findViewById<EditText>(R.id.etDate)
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
 
-        // === BẮT ĐẦU LOGIC FORMAT SỐ TỰ ĐỘNG ===
-        val numberFormat = DecimalFormat("#,###")
-        etAmount.addTextChangedListener(object : android.text.TextWatcher {
-            private var current = ""
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) {
-                if (s.toString() != current) {
-                    etAmount.removeTextChangedListener(this)
-                    try {
-                        val cleanString = s.toString().replace("[,.]".toRegex(), "")
-                        if (cleanString.isNotEmpty()) {
-                            val parsed = cleanString.toLong()
-                            val formatted = numberFormat.format(parsed)
-                            current = formatted
-                            etAmount.setText(formatted)
-                            etAmount.setSelection(formatted.length)
-                        } else {
-                            current = ""
-                            etAmount.setText("")
-                        }
-                    } catch (e: NumberFormatException) {
-                        // Xử lý nếu người dùng nhập ký tự không phải số
-                    }
-                    etAmount.addTextChangedListener(this)
-                }
-            }
-        })
-        // === KẾT THÚC LOGIC FORMAT SỐ TỰ ĐỘNG ===
 
         // ... (Phần định nghĩa defaultExpenseCats và defaultIncomeCats giữ nguyên) ...
         val defaultExpenseCats = listOf(
@@ -149,8 +120,8 @@ class TransactionsFragment : Fragment() {
             btnSubmit.text = "Cập nhật"
 
             etTitle.setText(existingTransaction.title)
-            // === SỬA Ở ĐÂY: DÙNG format khi điền dữ liệu cũ ===
-            etAmount.setText(numberFormat.format(existingTransaction.amount))
+            // SỬA THÀNH: Hiển thị số gốc, không format
+            etAmount.setText(existingTransaction.amount.toString())
             etDate.setText(existingTransaction.date)
 
             if (existingTransaction.isExpense) rbExpense.isChecked = true else rbIncome.isChecked = true
@@ -192,16 +163,22 @@ class TransactionsFragment : Fragment() {
                     date = date,
                     isExpense = isExpense
                 )
-                if (existingTransaction != null && position != null) {
+                // === PHIÊN BẢN SỬA LỖI ===
+                if (existingTransaction != null) {
+                    // Nếu là sửa, chỉ cần gọi hàm update trong DB
                     dbHelper.updateTransaction(existingTransaction.id, transaction)
-                    transactions[position] = transaction
                 } else {
+                    // Nếu là thêm mới, chỉ cần gọi hàm insert trong DB
                     dbHelper.insertTransaction(transaction)
-                    transactions.add(transaction)
                 }
-                transactionAdapter.notifyDataSetChanged()
+
+// Tải lại toàn bộ dữ liệu từ DB để đảm bảo Adapter luôn có dữ liệu mới nhất
+                loadTransactions()
+
+// Cập nhật các thông tin khác và đóng dialog
                 updateCategorySpending()
                 dialog.dismiss()
+
             }
         }
         dialog.show()
