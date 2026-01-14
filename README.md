@@ -43,7 +43,7 @@
 
 1.  **Clone dự án:**
     ```bash
-    git clone [https://github.com/bengimixDoo/androidsmartspend.git](https://github.com/bengimixDoo/androidsmartspend.git)
+    git clone https://github.com/bengimixDoo/androidsmartspend.git
     ```
 2.  **Mở trong Android Studio:**
    * Khởi động Android Studio -> Open -> Chọn thư mục vừa clone.
