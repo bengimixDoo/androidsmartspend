@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.smartspend2.models.Category
 import com.example.smartspend2.models.Transaction
 import com.example.smartspend2.adapters.TransactionAdapter
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -74,10 +75,10 @@ class TransactionsFragment : Fragment() {
      * Hàm hiển thị dialog để thêm/sửa giao dịch
      *
      */
-    private fun showAddTransactionDialog(existingTransaction: Transaction? = null, position: Int? = null) {
+     private fun showAddTransactionDialog(existingTransaction: Transaction? = null, position: Int? = null) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_transaction, null)
 
-        // 1. Ánh xạ View
+        // ... (Phần ánh xạ view giữ nguyên)
         val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
         val rgTransactionType = dialogView.findViewById<RadioGroup>(R.id.rgTransactionType)
         val rbExpense = dialogView.findViewById<RadioButton>(R.id.rbExpense)
@@ -88,92 +89,98 @@ class TransactionsFragment : Fragment() {
         val etDate = dialogView.findViewById<EditText>(R.id.etDate)
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
 
-        // 2. Định nghĩa danh sách Mặc định riêng biệt
+        // === BẮT ĐẦU LOGIC FORMAT SỐ TỰ ĐỘNG ===
+        val numberFormat = DecimalFormat("#,###")
+        etAmount.addTextChangedListener(object : android.text.TextWatcher {
+            private var current = ""
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                if (s.toString() != current) {
+                    etAmount.removeTextChangedListener(this)
+                    try {
+                        val cleanString = s.toString().replace("[,.]".toRegex(), "")
+                        if (cleanString.isNotEmpty()) {
+                            val parsed = cleanString.toLong()
+                            val formatted = numberFormat.format(parsed)
+                            current = formatted
+                            etAmount.setText(formatted)
+                            etAmount.setSelection(formatted.length)
+                        } else {
+                            current = ""
+                            etAmount.setText("")
+                        }
+                    } catch (e: NumberFormatException) {
+                        // Xử lý nếu người dùng nhập ký tự không phải số
+                    }
+                    etAmount.addTextChangedListener(this)
+                }
+            }
+        })
+        // === KẾT THÚC LOGIC FORMAT SỐ TỰ ĐỘNG ===
+
+        // ... (Phần định nghĩa defaultExpenseCats và defaultIncomeCats giữ nguyên) ...
         val defaultExpenseCats = listOf(
             getString(R.string.cat_food), getString(R.string.cat_transport),
             getString(R.string.cat_bills), getString(R.string.cat_entertainment),
             getString(R.string.cat_shopping), "Sức khỏe", "Giáo dục", getString(R.string.cat_other)
         )
-
         val defaultIncomeCats = listOf(
             getString(R.string.cat_salary), "Thưởng", "Phụ cấp", "Đầu tư", "Bán hàng", "Được tặng", getString(R.string.cat_other)
         )
 
-        // 3. Hàm cập nhật Spinner dựa trên loại (Thu hay Chi)
+        // ... (Phần hàm updateCategorySpinner giữ nguyên) ...
         fun updateCategorySpinner(isExpense: Boolean) {
-            // Lấy danh mục từ User tạo trong DB (Lọc theo loại)
-            val userCats = dbHelper.getAllCategories()
-                .filter { it.isExpense == isExpense } // Quan trọng: Chỉ lấy đúng loại
-                .map { it.name }
-
-            // Ghép với danh sách mặc định
+            val userCats = dbHelper.getAllCategories().filter { it.isExpense == isExpense }.map { it.name }
             val currentDefaults = if (isExpense) defaultExpenseCats else defaultIncomeCats
             val finalCategories = (currentDefaults + userCats).distinct()
-
-            // Gán vào Adapter
             val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, finalCategories)
             spinnerCategory.adapter = adapter
-
-            // Nếu đang sửa, chọn lại đúng vị trí danh mục cũ
             if (existingTransaction != null && existingTransaction.isExpense == isExpense) {
                 val index = finalCategories.indexOf(existingTransaction.category)
                 if (index >= 0) spinnerCategory.setSelection(index)
             }
         }
 
-        // 4. Xử lý Logic Giao diện (Sửa vs Thêm)
+
         if (existingTransaction != null) {
-            // --- CHẾ ĐỘ SỬA ---
             tvDialogTitle.text = "SỬA GIAO DỊCH"
-            rgTransactionType.visibility = View.GONE // Ẩn nút chọn
+            rgTransactionType.visibility = View.GONE
             btnSubmit.text = "Cập nhật"
 
-            // Điền dữ liệu cũ
             etTitle.setText(existingTransaction.title)
-            etAmount.setText(existingTransaction.amount.toString())
+            // === SỬA Ở ĐÂY: DÙNG format khi điền dữ liệu cũ ===
+            etAmount.setText(numberFormat.format(existingTransaction.amount))
             etDate.setText(existingTransaction.date)
 
-            // Set checked ngầm để logic lưu đúng
             if (existingTransaction.isExpense) rbExpense.isChecked = true else rbIncome.isChecked = true
-
-            // Cập nhật Spinner theo đúng loại của giao dịch đang sửa
             updateCategorySpinner(existingTransaction.isExpense)
-
         } else {
-            // --- CHẾ ĐỘ THÊM MỚI ---
+            // ... (Phần logic cho THÊM MỚI giữ nguyên) ...
             tvDialogTitle.text = getString(R.string.title_add_transaction)
             rgTransactionType.visibility = View.VISIBLE
             btnSubmit.text = getString(R.string.btn_add_transaction)
-
-            // Mặc định chọn Chi tiêu
             updateCategorySpinner(true)
-
-            // Lắng nghe sự kiện đổi RadioButton để cập nhật list danh mục
             rgTransactionType.setOnCheckedChangeListener { _, checkedId ->
                 val isExpense = (checkedId == R.id.rbExpense)
                 updateCategorySpinner(isExpense)
             }
         }
 
-        // 5. Tạo Dialog
-        val dialog = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .create()
+        val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        etDate.setOnClickListener {
-            showDatePicker { date -> etDate.setText(date) }
-        }
+        etDate.setOnClickListener { showDatePicker { date -> etDate.setText(date) } }
 
-        // 6. Xử lý nút Lưu
         btnSubmit.setOnClickListener {
             val title = etTitle.text.toString().trim()
-            val amount = etAmount.text.toString().toFloatOrNull()
-            // Kiểm tra spinner có item nào không (tránh lỗi nếu list rỗng)
+            // === SỬA Ở ĐÂY: Loại bỏ dấu phẩy trước khi chuyển sang Float ===
+            val amount = etAmount.text.toString().replace(",", "").toFloatOrNull()
             val category = if (spinnerCategory.selectedItem != null) spinnerCategory.selectedItem.toString() else "Khác"
             val date = etDate.text.toString().trim()
             val isExpense = rbExpense.isChecked
 
+            // ... (Phần logic lưu vào DB giữ nguyên) ...
             if (title.isEmpty() || amount == null || date.isEmpty()) {
                 Toast.makeText(context, getString(R.string.msg_fill_error), Toast.LENGTH_SHORT).show()
             } else {
@@ -185,7 +192,6 @@ class TransactionsFragment : Fragment() {
                     date = date,
                     isExpense = isExpense
                 )
-
                 if (existingTransaction != null && position != null) {
                     dbHelper.updateTransaction(existingTransaction.id, transaction)
                     transactions[position] = transaction
@@ -193,7 +199,6 @@ class TransactionsFragment : Fragment() {
                     dbHelper.insertTransaction(transaction)
                     transactions.add(transaction)
                 }
-
                 transactionAdapter.notifyDataSetChanged()
                 updateCategorySpending()
                 dialog.dismiss()

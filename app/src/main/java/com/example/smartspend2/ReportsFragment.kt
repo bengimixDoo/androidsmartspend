@@ -161,6 +161,16 @@ class ReportsFragment : Fragment() {
         dataSet.fillColor = Color.parseColor("#4ECDC4")
         dataSet.fillAlpha = 50
 
+        // === BỔ SUNG ĐOẠN NÀY ĐỂ FORMAT SỐ TIỀN ===
+        dataSet.valueFormatter = object : ValueFormatter() {
+            private val format = DecimalFormat("#,###")
+            override fun getFormattedValue(value: Float): String {
+                if (value == 0f) return "" // Không hiển thị số 0
+                return format.format(value)
+            }
+        }
+        // === KẾT THÚC BỔ SUNG ===
+
         val data = LineData(dataSet)
         lineChart.data = data
 
