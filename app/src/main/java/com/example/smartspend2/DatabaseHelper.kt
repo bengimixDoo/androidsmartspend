@@ -8,13 +8,21 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.example.smartspend2.models.Transaction
 import com.example.smartspend2.models.Category
 
+/**
+ * Lớp quản lý cơ sở dữ liệu SQLite chính của ứng dụng.
+ *
+ * Cung cấp các phương thức để:
+ * - Quản lý vòng đời Database (tạo, nâng cấp).
+ * - Thao tác CRUD với bảng Giao dịch (Transactions) và Danh mục (Categories).
+ * - Thực hiện các truy vấn thống kê báo cáo.
+ */
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "smartspend.db"
-        private const val DATABASE_VERSION = 4 // Nâng cấp phiên bản DB lên 4
+        private const val DATABASE_VERSION = 4
 
-        // Transaction Table
+        // --- Transaction Table Constants ---
         private const val TABLE_TRANSACTIONS = "transactions"
         private const val COLUMN_TRANSACTION_ID = "id"
         private const val COLUMN_TITLE = "title"
@@ -23,7 +31,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_DATE = "date"
         private const val COLUMN_IS_EXPENSE = "is_expense"
 
-        // Category Table
+        // --- Category Table Constants ---
         private const val TABLE_CATEGORIES = "categories"
         private const val COLUMN_CATEGORY_ID = "category_id"
         private const val COLUMN_CATEGORY_NAME = "name"
@@ -32,7 +40,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         private const val COLUMN_SPENT_AMOUNT = "spent_amount"
         private const val COLUMN_IS_EXPENSE_CATEGORY = "is_expense_category" // ĐỔI TÊN: Rõ nghĩa hơn
 
-        // Create Table Queries
+        // --- SQL Creation Statements ---
         private const val CREATE_TRANSACTIONS_TABLE = """
             CREATE TABLE $TABLE_TRANSACTIONS (
                 $COLUMN_TRANSACTION_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,27 +64,25 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         """
     }
 
+    /**
+     * Được gọi khi database được tạo lần đầu.
+     */
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_TRANSACTIONS_TABLE)
         db.execSQL(CREATE_CATEGORIES_TABLE)
     }
 
+    /**
+     * Xử lý nâng cấp database khi version thay đổi.
+     * Thực hiện các thay đổi cấu trúc (ALTER TABLE) để bảo toàn dữ liệu cũ.
+     */
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Luôn kiểm tra phiên bản cũ để thực hiện nâng cấp đúng cách.
-        // oldVersion là phiên bản database hiện tại trên máy người dùng.
-        // newVersion là phiên bản mới bạn đã đặt trong code (DATABASE_VERSION = 2).
-
         if (oldVersion < 2) {
-            // Nếu phiên bản cũ là 1, chúng ta cần thực hiện các thay đổi của phiên bản 2.
-            // Cụ thể là thêm cột is_expense vào cả hai bảng. Dùng tên cột cũ để đảm bảo di chuyển đúng.
+            // V2: Thêm cột is_expense
             try { 
                 db.execSQL("ALTER TABLE $TABLE_TRANSACTIONS ADD COLUMN is_expense INTEGER NOT NULL DEFAULT 1")
                 db.execSQL("ALTER TABLE $TABLE_CATEGORIES ADD COLUMN is_expense INTEGER NOT NULL DEFAULT 1")
             } catch (e: android.database.sqlite.SQLiteException) {
-                // Ghi lại log lỗi nếu cần, nhưng không làm crash app.
-                // Lỗi có thể xảy ra nếu người dùng tự can thiệp DB,
-                // hoặc trong một số kịch bản nâng cấp phức tạp.
-                // Bỏ qua lỗi trong trường hợp này để app tiếp tục chạy.
             }
         }
 
@@ -100,13 +106,15 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
 
-    // transaction methods
+    // --- Transaction Operations ---
 
+    /**
+     * Lấy danh sách tất cả giao dịch, sắp xếp theo ngày giảm dần.
+     */
     fun getAllTransactions(): List<Transaction> {
         val db = readableDatabase
         val transactions = mutableListOf<Transaction>()
 
-        // Query to select all transactions
         val cursor = db.rawQuery(
             "SELECT * FROM $TABLE_TRANSACTIONS ORDER BY $COLUMN_DATE DESC",
             null
@@ -128,7 +136,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return transactions
     }
 
-    // insert
+    /**
+     * Thêm một giao dịch mới vào database.
+     */
     fun insertTransaction(transaction: Transaction): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
@@ -141,10 +151,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return db.insert(TABLE_TRANSACTIONS, null, values)
     }
 
+    /**
+     * Xóa một giao dịch dựa trên ID.
+     */
     fun deleteTransaction(id: Long) {
         writableDatabase.delete(TABLE_TRANSACTIONS, "$COLUMN_TRANSACTION_ID = ?", arrayOf(id.toString()))
     }
 
+    /**
+     * Cập nhật thông tin một giao dịch đã tồn tại.
+     */
     fun updateTransaction(id: Long, transaction: Transaction) {
         val values = ContentValues().apply {
             put(COLUMN_TITLE, transaction.title)
@@ -156,7 +172,26 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         writableDatabase.update(TABLE_TRANSACTIONS, values, "$COLUMN_TRANSACTION_ID = ?", arrayOf(id.toString()))
     }
 
-    // Category Methods
+    /**
+     * Chuyển tất cả giao dịch từ danh mục cũ sang danh mục mới.
+     * Thường dùng trước khi xóa một danh mục để bảo toàn dữ liệu.
+     *
+     * @param oldCategory Tên danh mục cũ.
+     * @param newCategory Tên danh mục mới (thường là "Khác").
+     */
+    fun migrateTransactions(oldCategory: String, newCategory: String) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_CATEGORY, newCategory)
+        }
+        db.update(TABLE_TRANSACTIONS, values, "$COLUMN_CATEGORY = ?", arrayOf(oldCategory))
+    }
+
+    // --- Category Operations ---
+
+    /**
+     * Thêm một danh mục mới.
+     */
     fun insertCategory(category: Category): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
@@ -169,6 +204,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return db.insert(TABLE_CATEGORIES, null, values)
     }
 
+    /**
+     * Lấy danh sách tất cả danh mục, sắp xếp theo tên A-Z.
+     */
     fun getAllCategories(): List<Category> {
         val db = readableDatabase
         val cursor: Cursor = db.rawQuery("SELECT * FROM $TABLE_CATEGORIES ORDER BY $COLUMN_CATEGORY_NAME ASC", null)
@@ -191,17 +229,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return categories
     }
 
+    /**
+     * Xóa một danh mục dựa trên tên.
+     */
     fun deleteCategory(name: String) {
         val db = writableDatabase
         db.delete(TABLE_CATEGORIES, "$COLUMN_CATEGORY_NAME = ?", arrayOf(name))
     }
 
-    // Calculate total spending per category
+    /**
+     * Tính tổng chi tiêu cho từng danh mục.
+     * @return Map với Key là tên danh mục, Value là tổng tiền chi.
+     */
     fun calculateCategorySpending(): Map<String, Float> {
         val db = readableDatabase
         val spendingMap = mutableMapOf<String, Float>()
 
-        // Query to sum the spending by category
         val cursor = db.rawQuery(
             "SELECT $COLUMN_CATEGORY, SUM($COLUMN_AMOUNT) " +
                     "as total_spent " +
@@ -220,11 +263,13 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return spendingMap
     }
 
-    // Hàm này tính tổng thu nhập cho mỗi category
+    /**
+     * Tính tổng thu nhập cho từng danh mục.
+     * @return Map với Key là tên danh mục, Value là tổng tiền thu.
+     */
     fun calculateCategoryIncome(): Map<String, Float> {
         val map = mutableMapOf<String, Float>()
         val db = this.readableDatabase
-        // Thay đổi điều kiện WHERE isExpense = 0 để chỉ lấy các khoản THU
         val cursor = db.rawQuery(
             "SELECT $COLUMN_CATEGORY, SUM($COLUMN_AMOUNT) " +
                     "as total_spent " +
@@ -244,7 +289,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     }
 
 
-    //update category
+    /**
+     * Cập nhật thông tin danh mục (tên, ngân sách, số tiền đã chi...).
+     */
     fun updateCategory(category: Category): Int {
         val db = writableDatabase
         val values = ContentValues().apply {
@@ -252,9 +299,8 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_ALLOCATED_AMOUNT, category.allocatedAmount)
             put(COLUMN_SPENT_AMOUNT, category.spentAmount)
             put(COLUMN_IS_EXPENSE_CATEGORY, if (category.isExpense) 1 else 0)
-        } // Không cập nhật key vì nó là định danh cố định
+        } 
 
-        // Cập nhật danh mục dựa trên ID
         return db.update(
             TABLE_CATEGORIES,
             values,
@@ -263,6 +309,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         )
     }
 
+    /**
+     * Lấy danh sách danh mục theo loại (Thu hoặc Chi).
+     */
     fun getCategoriesByType(isExpense: Boolean): List<Category> {
         val db = readableDatabase
         val categories = mutableListOf<Category>()

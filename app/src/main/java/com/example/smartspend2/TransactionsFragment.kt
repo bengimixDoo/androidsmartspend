@@ -22,6 +22,14 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Fragment quản lý các giao dịch (Transactions).
+ *
+ * Chức năng chính:
+ * - Hiển thị danh sách lịch sử giao dịch.
+ * - Thêm mới, chỉnh sửa và xóa giao dịch.
+ * - Cảnh báo người dùng qua thông báo (Notification) khi chi tiêu vượt ngân sách.
+ */
 class TransactionsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
@@ -29,6 +37,9 @@ class TransactionsFragment : Fragment() {
     private val transactions = mutableListOf<Transaction>()
     private lateinit var dbHelper: DatabaseHelper
 
+    /**
+     * Khởi tạo Fragment. Tạo kênh thông báo (Notification Channel) cho Android O trở lên.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
@@ -41,30 +52,34 @@ class TransactionsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_transactions, container, false)
     }
 
+    /**
+     * Thiết lập giao diện và logic sau khi View được tạo.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Khởi tạo Database và View
         dbHelper = DatabaseHelper(requireContext())
         recyclerView = view.findViewById(R.id.rvTransactions)
         recyclerView.layoutManager = LinearLayoutManager(context)
 
-        // 2. KHỞI TẠO ADAPTER TRƯỚC
+        // Khởi tạo Adapter
         transactionAdapter = TransactionAdapter(transactions) { transaction, position ->
             showTransactionOptions(transaction, position)
         }
         recyclerView.adapter = transactionAdapter
 
-        // 3. LOAD DỮ LIỆU SAU
+        // Tải dữ liệu
         loadTransactions()
 
-        // 4. Các nút bấm khác
         val fabAdd: View = view.findViewById(R.id.fabAddTransaction)
         fabAdd.setOnClickListener {
             showAddTransactionDialog()
         }
     }
 
+    /**
+     * Tải danh sách giao dịch từ Database và cập nhật lên RecyclerView.
+     */
     private fun loadTransactions() {
         transactions.clear()
         transactions.addAll(dbHelper.getAllTransactions())
@@ -72,13 +87,14 @@ class TransactionsFragment : Fragment() {
     }
 
     /**
-     * Hàm hiển thị dialog để thêm/sửa giao dịch
+     * Hiển thị hộp thoại để thêm mới hoặc chỉnh sửa một giao dịch.
      *
+     * @param existingTransaction Giao dịch cần sửa (null nếu là thêm mới).
+     * @param position Vị trí của item trong danh sách (không bắt buộc).
      */
      private fun showAddTransactionDialog(existingTransaction: Transaction? = null, position: Int? = null) {
         val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_add_transaction, null)
 
-        // ... (Phần ánh xạ view giữ nguyên)
         val tvDialogTitle = dialogView.findViewById<TextView>(R.id.tvDialogTitle)
         val rgTransactionType = dialogView.findViewById<RadioGroup>(R.id.rgTransactionType)
         val rbExpense = dialogView.findViewById<RadioButton>(R.id.rbExpense)
@@ -90,7 +106,6 @@ class TransactionsFragment : Fragment() {
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
 
 
-        // ... (Phần định nghĩa defaultExpenseCats và defaultIncomeCats giữ nguyên) ...
         val defaultExpenseCats = listOf(
             getString(R.string.cat_food), getString(R.string.cat_transport),
             getString(R.string.cat_bills), getString(R.string.cat_entertainment),
@@ -107,7 +122,7 @@ class TransactionsFragment : Fragment() {
             getString(R.string.cat_other)
         )
 
-        // ... (Phần hàm updateCategorySpinner giữ nguyên) ...
+        // Hàm cập nhật Spinner danh mục dựa trên loại giao dịch (Thu/Chi)
         fun updateCategorySpinner(isExpense: Boolean) {
             val userCats = dbHelper.getAllCategories().filter { it.isExpense == isExpense }.map { it.name }
             val currentDefaults = if (isExpense) defaultExpenseCats else defaultIncomeCats
@@ -127,14 +142,12 @@ class TransactionsFragment : Fragment() {
             btnSubmit.text = "Cập nhật"
 
             etTitle.setText(existingTransaction.title)
-            // SỬA THÀNH: Hiển thị số gốc, không format
             etAmount.setText(existingTransaction.amount.toString())
             etDate.setText(existingTransaction.date)
 
             if (existingTransaction.isExpense) rbExpense.isChecked = true else rbIncome.isChecked = true
             updateCategorySpinner(existingTransaction.isExpense)
         } else {
-            // ... (Phần logic cho THÊM MỚI giữ nguyên) ...
             tvDialogTitle.text = getString(R.string.title_add_transaction)
             rgTransactionType.visibility = View.VISIBLE
             btnSubmit.text = getString(R.string.btn_add_transaction)
@@ -152,13 +165,11 @@ class TransactionsFragment : Fragment() {
 
         btnSubmit.setOnClickListener {
             val title = etTitle.text.toString().trim()
-            // === SỬA Ở ĐÂY: Loại bỏ dấu phẩy trước khi chuyển sang Float ===
             val amount = etAmount.text.toString().replace(",", "").toFloatOrNull()
             val category = if (spinnerCategory.selectedItem != null) spinnerCategory.selectedItem.toString() else "Khác"
             val date = etDate.text.toString().trim()
             val isExpense = rbExpense.isChecked
 
-            // ... (Phần logic lưu vào DB giữ nguyên) ...
             if (title.isEmpty() || amount == null || date.isEmpty()) {
                 Toast.makeText(context, getString(R.string.msg_fill_error), Toast.LENGTH_SHORT).show()
             } else {
@@ -170,7 +181,6 @@ class TransactionsFragment : Fragment() {
                     date = date,
                     isExpense = isExpense
                 )
-                // === PHIÊN BẢN SỬA LỖI ===
                 if (existingTransaction != null) {
                     // Nếu là sửa, chỉ cần gọi hàm update trong DB
                     dbHelper.updateTransaction(existingTransaction.id, transaction)
@@ -179,10 +189,10 @@ class TransactionsFragment : Fragment() {
                     dbHelper.insertTransaction(transaction)
                 }
 
-// Tải lại toàn bộ dữ liệu từ DB để đảm bảo Adapter luôn có dữ liệu mới nhất
+                // Tải lại toàn bộ dữ liệu từ DB để đảm bảo Adapter luôn có dữ liệu mới nhất
                 loadTransactions()
 
-// Cập nhật các thông tin khác và đóng dialog
+                // Cập nhật các thông tin khác và đóng dialog
                 updateCategorySpending()
                 dialog.dismiss()
 
@@ -192,6 +202,9 @@ class TransactionsFragment : Fragment() {
     }
 
 
+    /**
+     * Hiển thị hộp thoại chọn ngày tháng.
+     */
     private fun showDatePicker(onDateSelected: (String) -> Unit) {
         val calendar = Calendar.getInstance()
         val datePicker = DatePickerDialog(
@@ -209,22 +222,29 @@ class TransactionsFragment : Fragment() {
         datePicker.show()
     }
 
+    /**
+     * Hiển thị menu tùy chọn (Sửa/Xóa) khi nhấn vào một giao dịch.
+     */
     private fun showTransactionOptions(transaction: Transaction, position: Int) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Tùy chọn giao dịch") // Tiếng Việt
-            .setItems(arrayOf("Sửa", "Xóa")) { _, which -> // Tiếng Việt
+            .setTitle("Tùy chọn giao dịch")
+            .setItems(arrayOf("Sửa", "Xóa")) { _, which ->
                 when (which) {
                     0 -> showAddTransactionDialog(transaction, position)
                     1 -> {
                         dbHelper.deleteTransaction(transaction.id)
-                        loadTransactions() // Load lại list từ DB để đảm bảo đồng bộ
-                        updateCategorySpending() // Cập nhật lại tiền đã tiêu cho category
+                        loadTransactions()
+                        updateCategorySpending()
                     }
                 }
             }
             .show()
     }
 
+    /**
+     * Tính toán lại tổng chi tiêu của các danh mục và cập nhật vào Database.
+     * Sau đó kiểm tra hạn mức ngân sách.
+     */
     private fun updateCategorySpending() {
         val spendingMap = dbHelper.calculateCategorySpending()
         val categories = dbHelper.getAllCategories()
@@ -240,20 +260,27 @@ class TransactionsFragment : Fragment() {
         checkSpendingLimits(categoriesToCheck)
     }
 
+    /**
+     * Tạo kênh thông báo cho hệ thống (yêu cầu bắt buộc đối với Android 8.0+).
+     */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 "SPENDING_ALERTS",
-                "Cảnh báo chi tiêu", // Tên kênh tiếng Việt
+                "Cảnh báo chi tiêu",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Thông báo khi bạn vượt quá ngân sách" // Mô tả tiếng Việt
+                description = "Thông báo khi bạn vượt quá ngân sách"
             }
             val manager = requireContext().getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
     }
 
+    /**
+     * Kiểm tra hạn mức chi tiêu của các danh mục.
+     * Gửi thông báo nếu chi tiêu đạt 80%, 90% hoặc 100% ngân sách.
+     */
     fun checkSpendingLimits(categoryList: List<Category>) {
         categoryList.forEach { category ->
             // Tránh chia cho 0
@@ -286,6 +313,9 @@ class TransactionsFragment : Fragment() {
         }
     }
 
+    /**
+     * Gửi thông báo lên thanh trạng thái.
+     */
     private fun sendNotification(category: String, title: String, message: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
@@ -297,7 +327,7 @@ class TransactionsFragment : Fragment() {
         }
 
         val builder = NotificationCompat.Builder(requireContext(), "SPENDING_ALERTS")
-            .setSmallIcon(R.drawable.ic_notification) // Đảm bảo bạn có icon này
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
