@@ -18,7 +18,7 @@ class GetStartedActivity : AppCompatActivity() {
         btnGetStarted.setOnClickListener {
             val firstTime = prefs.getBoolean("first_time", true)
             if (firstTime) {
-                startActivity(Intent(this, SetupActivity::class.java))
+                startActivity(Intent(this, LoginActivity::class.java))
             } else {
                 startActivity(Intent(this, MainActivity::class.java))
             }

@@ -9,6 +9,7 @@ plugins {
     // Thêm plugin safeargs ở đây nếu bạn cần sử dụng, dựa trên file build.gradle.kts của project
     alias(libs.plugins.androidx.navigation.safeargs)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -87,4 +88,8 @@ dependencies {
 
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
     implementation("androidx.navigation:navigation-ui-ktx:2.8.5")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
 }
