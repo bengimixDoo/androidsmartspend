@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#E9FAFD">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ĐĂNG KÝ"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#202B3C"
+        android:gravity="center"
+        android:layout_marginBottom="40dp"/>
+
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:backgroundTint="#27585B"
+        android:textColor="#202B3C"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="15dp"/>
+
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Mật khẩu"
+        android:inputType="textPassword"
+        android:backgroundTint="#27585B"
+        android:textColor="#202B3C"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="15dp"/>
+
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:hint="Nhập lại mật khẩu"
+        android:inputType="textPassword"
+        android:backgroundTint="#27585B"
+        android:textColor="#202B3C"
+        android:paddingHorizontal="16dp"
+        android:layout_marginBottom="30dp"/>
+
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="Đăng ký"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#27585B"/>
+
+    <TextView
+        android:id="@+id/tvLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="Đã có tài khoản? Đăng nhập"
+        android:textStyle="bold"
+        android:textColor="#27585B"/>
+</LinearLayout>
