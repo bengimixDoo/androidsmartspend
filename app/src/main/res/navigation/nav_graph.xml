@@ -22,4 +22,9 @@
         android:name="com.example.smartspend2.ReportsFragment"
         android:label="fragment_reports"
         tools:layout="@layout/fragment_reports" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.smartspend2.SettingsFragment"
+        android:label="Tài khoản"/>
 </navigation>

@@ -344,4 +344,17 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return categories
     }
 
+    fun clearDatabase() {
+        val db = writableDatabase
+
+        db.beginTransaction()
+        try {
+            db.delete(TABLE_TRANSACTIONS, null, null)
+            db.delete(TABLE_CATEGORIES, null, null)
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
 }
