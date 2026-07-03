@@ -158,6 +158,22 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, getDatabaseNa
     }
 
     /**
+     * Thêm một giao dịch từ Cloud Sync (giữ nguyên ID và không upload ngược lại).
+     */
+    fun insertTransactionSync(transaction: Transaction) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_TRANSACTION_ID, transaction.id)
+            put(COLUMN_TITLE, transaction.title)
+            put(COLUMN_AMOUNT, transaction.amount)
+            put(COLUMN_CATEGORY, transaction.category)
+            put(COLUMN_DATE, transaction.date)
+            put(COLUMN_IS_EXPENSE, if (transaction.isExpense) 1 else 0)
+        }
+        db.insertWithOnConflict(TABLE_TRANSACTIONS, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    /**
      * Xóa một giao dịch dựa trên ID.
      */
     fun deleteTransaction(id: Long) {
@@ -212,6 +228,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, getDatabaseNa
         val id = db.insert(TABLE_CATEGORIES, null, values)
         CloudSyncManager.uploadCategory(category.copy(id = id))
         return id
+    }
+
+    /**
+     * Thêm một danh mục từ Cloud Sync (giữ nguyên ID và không upload ngược lại).
+     */
+    fun insertCategorySync(category: Category) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_CATEGORY_ID, category.id)
+            put(COLUMN_CATEGORY_NAME, category.name)
+            put(COLUMN_ALLOCATED_AMOUNT, category.allocatedAmount)
+            put(COLUMN_SPENT_AMOUNT, category.spentAmount)
+            put(COLUMN_IS_EXPENSE_CATEGORY, if (category.isExpense) 1 else 0)
+            put(COLUMN_CATEGORY_KEY, category.key)
+        }
+        // Dùng insertWithOnConflict để ghi đè nếu đã tồn tại
+        db.insertWithOnConflict(TABLE_CATEGORIES, null, values, SQLiteDatabase.CONFLICT_REPLACE)
     }
 
     /**

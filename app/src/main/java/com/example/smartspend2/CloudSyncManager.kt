@@ -78,7 +78,7 @@ object CloudSyncManager {
             for (doc in categoriesSnapshot.documents) {
                 val cat = doc.toObject(Category::class.java)
                 if (cat != null) {
-                    dbHelper.insertCategory(cat)
+                    dbHelper.insertCategorySync(cat)
                 }
             }
 
@@ -87,7 +87,7 @@ object CloudSyncManager {
             for (doc in transactionsSnapshot.documents) {
                 val trans = doc.toObject(Transaction::class.java)
                 if (trans != null) {
-                    dbHelper.insertTransaction(trans)
+                    dbHelper.insertTransactionSync(trans)
                 }
             }
 
