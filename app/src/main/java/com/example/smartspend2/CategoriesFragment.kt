@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.smartspend2.adapters.CategoryAdapter
 import com.example.smartspend2.models.Category
+import com.example.smartspend2.utils.NumberTextWatcher
 
 /**
  * Fragment quản lý danh mục (Categories).
@@ -103,6 +104,8 @@ class CategoriesFragment : Fragment() {
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
         val rbIncome = dialogView.findViewById<RadioButton>(R.id.rbIncome)
 
+        etAllocatedAmount.addTextChangedListener(NumberTextWatcher(etAllocatedAmount))
+
         rbExpense.isChecked = true // Mặc định là Expense
         etAllocatedAmount.visibility = View.VISIBLE // Mặc định hiển thị ngân sách
 
@@ -126,7 +129,7 @@ class CategoriesFragment : Fragment() {
             val name = etCategoryName.text.toString().trim()
             val isExpense = rbExpense.isChecked
             // Nếu là income, ngân sách mặc định là 0
-            val allocatedAmount = if (isExpense) etAllocatedAmount.text.toString().toFloatOrNull() else 0f
+            val allocatedAmount = if (isExpense) NumberTextWatcher.getCleanValue(etAllocatedAmount.text.toString()).toFloatOrNull() else 0f
 
             if (name.isEmpty() || allocatedAmount == null) {
                 etCategoryName.error = if (name.isEmpty()) "Nhập tên danh mục" else null

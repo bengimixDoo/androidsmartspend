@@ -8,7 +8,10 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth // Import thư viện của Firebase
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
 
@@ -72,10 +75,35 @@ class LoginActivity : AppCompatActivity() {
                     // Firebase tự động quản lý phiên làm việc (Session/Token) cho bạn.
                     // Không cần dùng SharedPreferences để lưu JWT bằng tay nữa.
 
-                    // Chuyển hướng
-                    val intent = Intent(this, SetupActivity::class.java)
-                    startActivity(intent)
-                    finish()
+                    // Kiểm tra Firestore
+                    val userId = auth.currentUser?.uid ?: "default"
+                    FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(userId)
+                        .collection("profile")
+                        .document("info")
+                        .get()
+                        .addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                // Tải dữ liệu về local và vào MainActivity
+                                lifecycleScope.launch {
+                                    CloudSyncManager.downloadAllDataToLocal(this@LoginActivity)
+                                    val intent = Intent(this@LoginActivity, MainActivity::class.java)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                            } else {
+                                val intent = Intent(this@LoginActivity, SetupActivity::class.java)
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
+                        .addOnFailureListener {
+                            // Nếu lỗi, tạm cho qua Setup
+                            val intent = Intent(this@LoginActivity, SetupActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        }
                 } else {
                     // Nhánh thất bại (Sai pass, tài khoản chưa tồn tại...)
                     // task.exception?.message sẽ in ra nguyên nhân lỗi cụ thể từ hệ thống Firebase

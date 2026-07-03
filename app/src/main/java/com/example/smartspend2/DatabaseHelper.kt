@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import com.google.firebase.auth.FirebaseAuth
 import com.example.smartspend2.models.Transaction
 import com.example.smartspend2.models.Category
 
@@ -16,10 +17,13 @@ import com.example.smartspend2.models.Category
  * - Thao tác CRUD với bảng Giao dịch (Transactions) và Danh mục (Categories).
  * - Thực hiện các truy vấn thống kê báo cáo.
  */
-class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, getDatabaseName(), null, DATABASE_VERSION) {
 
     companion object {
-        private const val DATABASE_NAME = "smartspend.db"
+        private fun getDatabaseName(): String {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "default"
+            return "smartspend_$userId.db"
+        }
         private const val DATABASE_VERSION = 4
 
         // --- Transaction Table Constants ---
@@ -148,7 +152,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_DATE, transaction.date)
             put(COLUMN_IS_EXPENSE, if (transaction.isExpense) 1 else 0)
         }
-        return db.insert(TABLE_TRANSACTIONS, null, values)
+        val id = db.insert(TABLE_TRANSACTIONS, null, values)
+        CloudSyncManager.uploadTransaction(transaction.copy(id = id))
+        return id
     }
 
     /**
@@ -156,6 +162,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
      */
     fun deleteTransaction(id: Long) {
         writableDatabase.delete(TABLE_TRANSACTIONS, "$COLUMN_TRANSACTION_ID = ?", arrayOf(id.toString()))
+        CloudSyncManager.deleteTransaction(id)
     }
 
     /**
@@ -170,6 +177,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_IS_EXPENSE, if (transaction.isExpense) 1 else 0)
         }
         writableDatabase.update(TABLE_TRANSACTIONS, values, "$COLUMN_TRANSACTION_ID = ?", arrayOf(id.toString()))
+        CloudSyncManager.uploadTransaction(transaction.copy(id = id))
     }
 
     /**
@@ -201,7 +209,9 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_IS_EXPENSE_CATEGORY, if (category.isExpense) 1 else 0)
             put(COLUMN_CATEGORY_KEY, category.key)
         }
-        return db.insert(TABLE_CATEGORIES, null, values)
+        val id = db.insert(TABLE_CATEGORIES, null, values)
+        CloudSyncManager.uploadCategory(category.copy(id = id))
+        return id
     }
 
     /**
@@ -235,6 +245,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
     fun deleteCategory(name: String) {
         val db = writableDatabase
         db.delete(TABLE_CATEGORIES, "$COLUMN_CATEGORY_NAME = ?", arrayOf(name))
+        CloudSyncManager.deleteCategory(name)
     }
 
     /**
@@ -301,12 +312,16 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
             put(COLUMN_IS_EXPENSE_CATEGORY, if (category.isExpense) 1 else 0)
         } 
 
-        return db.update(
+        val rows = db.update(
             TABLE_CATEGORIES,
             values,
             "$COLUMN_CATEGORY_ID = ?",
             arrayOf(category.id.toString())
         )
+        if (rows > 0) {
+            CloudSyncManager.uploadCategory(category)
+        }
+        return rows
     }
 
     /**
