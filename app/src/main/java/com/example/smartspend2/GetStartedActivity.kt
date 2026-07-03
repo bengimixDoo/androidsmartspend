@@ -12,15 +12,21 @@ class GetStartedActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_get_started)
 
-        val prefs = getSharedPreferences("SmartSpendPrefs", MODE_PRIVATE)
         val btnGetStarted: Button = findViewById(R.id.btnGetStarted)
 
         btnGetStarted.setOnClickListener {
-            val firstTime = prefs.getBoolean("first_time", true)
-            if (firstTime) {
+            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            if (currentUser == null) {
                 startActivity(Intent(this, LoginActivity::class.java))
             } else {
-                startActivity(Intent(this, MainActivity::class.java))
+                val userId = currentUser.uid
+                val prefs = getSharedPreferences("SmartSpendPrefs_$userId", MODE_PRIVATE)
+                val firstTime = prefs.getBoolean("first_time", true)
+                if (firstTime) {
+                    startActivity(Intent(this, SetupActivity::class.java))
+                } else {
+                    startActivity(Intent(this, MainActivity::class.java))
+                }
             }
             finish()
         }

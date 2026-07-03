@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         val dbHelper = DatabaseHelper(this)
         syncDefaultCategoryNames(this, dbHelper)
         createDefaultCategoriesIfNeeded(this, dbHelper)
-        addDummyData(dbHelper)
 
         // Liên kết BottomNavigationView với NavController để tự động xử lý điều hướng
         bottomNav.setupWithNavController(navController)
@@ -128,27 +127,4 @@ private fun createDefaultCategoriesIfNeeded(context: Context, dbHelper: Database
     }
 }
 
-/**
- * Thêm dữ liệu giả lập (Dummy Data) vào cơ sở dữ liệu phục vụ mục đích kiểm thử/phát triển.
- *
- * Chỉ thêm dữ liệu nếu bảng giao dịch hiện tại đang trống.
- *
- * @param dbHelper Helper để thao tác với cơ sở dữ liệu.
- */
-fun addDummyData(dbHelper: DatabaseHelper) {
-    if (dbHelper.getAllTransactions().isNotEmpty()) return
-    
-    val dummyList = listOf(
 
-        Transaction(0, "Phở bò", 45000f, "Ăn uống", "14 Jan 2026", true),
-        Transaction(0, "Cà phê", 25000f, "Ăn uống", "14 Jan 2026", true),
-        Transaction(0, "Đổ xăng", 60000f, "Di chuyển", "12 Jan 2026", true),
-        Transaction(0, "Tiền nhà", 3000000f, "Hóa đơn", "01 Jan 2026", true),
-        Transaction(0, "Lương tháng", 10000000f, "Lương", "05 Jan 2026", false)
-    )
-
-    // Chèn từng cái vào Database
-    for (item in dummyList) {
-        dbHelper.insertTransaction(item)
-    }
-}

@@ -21,6 +21,7 @@ import com.example.smartspend2.adapters.TransactionAdapter
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import com.example.smartspend2.utils.NumberTextWatcher
 
 /**
  * Fragment quản lý các giao dịch (Transactions).
@@ -105,6 +106,8 @@ class TransactionsFragment : Fragment() {
         val etDate = dialogView.findViewById<EditText>(R.id.etDate)
         val btnSubmit = dialogView.findViewById<Button>(R.id.btnSubmit)
 
+        etAmount.addTextChangedListener(NumberTextWatcher(etAmount))
+
 
         val defaultExpenseCats = listOf(
             getString(R.string.cat_food), getString(R.string.cat_transport),
@@ -142,7 +145,8 @@ class TransactionsFragment : Fragment() {
             btnSubmit.text = "Cập nhật"
 
             etTitle.setText(existingTransaction.title)
-            etAmount.setText(existingTransaction.amount.toString())
+            // Lấy format từ DecimalFormat trong NumberTextWatcher để load cho đúng (tuy nhiên để đơn giản, cứ set rồi Watcher sẽ tự format)
+            etAmount.setText(existingTransaction.amount.toLong().toString())
             etDate.setText(existingTransaction.date)
 
             if (existingTransaction.isExpense) rbExpense.isChecked = true else rbIncome.isChecked = true
@@ -165,7 +169,7 @@ class TransactionsFragment : Fragment() {
 
         btnSubmit.setOnClickListener {
             val title = etTitle.text.toString().trim()
-            val amount = etAmount.text.toString().replace(",", "").toFloatOrNull()
+            val amount = NumberTextWatcher.getCleanValue(etAmount.text.toString()).toFloatOrNull()
             val category = if (spinnerCategory.selectedItem != null) spinnerCategory.selectedItem.toString() else "Khác"
             val date = etDate.text.toString().trim()
             val isExpense = rbExpense.isChecked

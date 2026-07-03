@@ -38,18 +38,6 @@ class SettingsFragment : Fragment() {
             .setPositiveButton("Đăng xuất") { _, _ ->
 
                 FirebaseAuth.getInstance().signOut()
-                //Xóa SQLite
-                val dbHelper = DatabaseHelper(requireContext())
-                dbHelper.clearDatabase()
-
-                //Reset first_time
-                val prefs = requireContext().getSharedPreferences(
-                    "SmartSpendPrefs",
-                    android.content.Context.MODE_PRIVATE
-                )
-                prefs.edit()
-                    .putBoolean("first_time", true)
-                    .apply()
 
                 //Quay về màn hình đầu tiên
                 val intent = Intent(requireContext(), GetStartedActivity::class.java)
