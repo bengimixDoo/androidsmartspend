@@ -126,5 +126,3 @@ private fun createDefaultCategoriesIfNeeded(context: Context, dbHelper: Database
         dbHelper.insertCategory(category)
     }
 }
-
-

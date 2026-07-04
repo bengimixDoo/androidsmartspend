@@ -6,12 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 
 class SettingsFragment : Fragment() {
 
+    private lateinit var tvAccountEmail: TextView
     private lateinit var btnLogout: Button
 
     override fun onCreateView(
@@ -23,7 +25,11 @@ class SettingsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        tvAccountEmail = view.findViewById(R.id.tvAccountEmail)
         btnLogout = view.findViewById(R.id.btnLogout)
+
+        val currentEmail = FirebaseAuth.getInstance().currentUser?.email
+        tvAccountEmail.text = currentEmail ?: getString(R.string.account_email_empty)
 
         btnLogout.setOnClickListener {
             showLogoutDialog()

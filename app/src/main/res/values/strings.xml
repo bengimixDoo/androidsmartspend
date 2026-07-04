@@ -64,4 +64,9 @@
     <string name="source_expenditure">Nguồn Chi</string>
     <string name="source_income">Nguồn Thu</string>
     <string name="btn_add_category">Thêm danh mục</string>
+    <string name="account_title">Tài khoản</string>
+    <string name="account_subtitle">Thông tin đăng nhập trên thiết bị này</string>
+    <string name="account_email_label">Email đăng nhập</string>
+    <string name="account_email_empty">Chưa có email hiển thị</string>
+    <string name="logout">Đăng xuất</string>
 </resources>
