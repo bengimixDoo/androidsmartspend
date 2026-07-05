@@ -65,8 +65,6 @@ Repo hiện tại đang đi theo hướng tổ chức khá thực dụng, tập 
 - `adapters/` chứa adapter cho RecyclerView
 - `models/` chứa model dữ liệu như `Transaction` và `Category`
 
-README này mô tả đúng theo code hiện tại của repo, tức là ứng dụng đang dùng mô hình kết hợp giữa lưu local và đồng bộ cloud, thay vì một kiến trúc MVVM đầy đủ.
-
 ## ⚙️ Yêu cầu môi trường
 
 - Android Studio
