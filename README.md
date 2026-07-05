@@ -1,57 +1,47 @@
-# SmartSpend - Quản lý Tài chính Cá nhân Thông minh
+# SmartSpend - Quản lý tài chính cá nhân
 
 ![SmartSpend Banner](app/src/main/res/drawable/ic_image.png)
-**SmartSpend** là ứng dụng Android giúp người dùng theo dõi thu chi, lập ngân sách và quản lý tài chính cá nhân một cách hiệu quả và trực quan. Ứng dụng được phát triển bằng ngôn ngữ **Kotlin**, sử dụng kiến trúc **MVVM** (cơ bản) và **SQLite** để lưu trữ dữ liệu offline.
 
-## 🚀 Tính năng nổi bật
+**SmartSpend** là ứng dụng Android giúp theo dõi thu chi, quản lý danh mục, lập ngân sách và xem thống kê tài chính cá nhân. Dự án được viết bằng **Kotlin**, dùng **SQLite** để lưu dữ liệu cục bộ và **Firebase** để đăng nhập, lưu phiên và đồng bộ dữ liệu.
 
-### 1. Quản lý Giao dịch (Transactions)
-* ✅ **Thêm/Sửa/Xóa giao dịch:** Ghi chép nhanh chóng các khoản thu nhập và chi tiêu.
-* ✅ **Phân loại đa dạng:** Hỗ trợ các danh mục mặc định (Ăn uống, Di chuyển, Lương...) và cho phép người dùng tự tạo danh mục mới.
-* ✅ **Chọn ngày linh hoạt:** Lựa chọn ngày tháng giao dịch dễ dàng.
+## 🚀 Tính năng chính
 
-### 2. Báo cáo & Thống kê (Reports & Analytics)
-* 📊 **Tổng quan:** Hiển thị Tổng thu, Tổng chi và Số dư hiện tại ngay trên màn hình chính.
-* 📈 **Biểu đồ Xu hướng (Trend Chart):** Biểu đồ cột so sánh Thu/Chi trong 6 tháng gần nhất.
-* 📉 **Xu hướng Danh mục (Category Trend):** Biểu đồ đường theo dõi biến động chi tiêu của từng danh mục cụ thể.
-* 🏆 **Top Chi tiêu:** Tự động liệt kê 5 danh mục tiêu tốn nhiều tiền nhất.
-* 📋 **Chi tiết Danh mục:** Xem lịch sử giao dịch chi tiết của từng nhóm chi tiêu.
-
-### 3. Quản lý Ngân sách & Cảnh báo (Budget & Notifications)
-* 💰 **Thiết lập ngân sách:** Đặt hạn mức chi tiêu cho từng danh mục.
-* 🔔 **Cảnh báo thông minh:** Hệ thống tự động gửi thông báo (Notification) khi bạn tiêu vượt quá 80%, 90% hoặc 100% ngân sách đã đặt.
-
-### 4. Giao diện thân thiện
-* Hỗ trợ hiển thị Tiếng Việt.
-* Giao diện Material Design hiện đại, dễ sử dụng.
-
----
+- ✅ Thêm, sửa, xóa giao dịch thu nhập và chi tiêu
+- 🗂️ Quản lý danh mục mặc định và tự tạo danh mục mới
+- 💰 Thiết lập ngân sách cho từng danh mục
+- 🔔 Cảnh báo khi chi tiêu đạt 80%, 90% hoặc vượt 100% ngân sách
+- 📊 Xem tổng thu, tổng chi, số dư và các biểu đồ thống kê
+- ☁️ Đăng nhập/đăng ký tài khoản và đồng bộ dữ liệu qua Firebase
 
 ## 🛠 Công nghệ sử dụng
 
-* **Ngôn ngữ:** [Kotlin](https://kotlinlang.org/)
-* **IDE:** Android Studio
-* **Cơ sở dữ liệu:** SQLite (sử dụng `SQLiteOpenHelper`)
-* **Biểu đồ:** [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart) - Thư viện vẽ biểu đồ mạnh mẽ.
-* **Giao diện:** XML Layouts, RecyclerView, ConstraintLayout.
+- **Ngôn ngữ:** [Kotlin](https://kotlinlang.org/)
+- **UI:** XML Layouts, RecyclerView, ConstraintLayout
+- **Local database:** SQLite (`SQLiteOpenHelper`)
+- **Cloud & Auth:** Firebase Authentication, Cloud Firestore
+- **Biểu đồ:** [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
+- **IDE:** Android Studio
 
----
+## ⚙️ Yêu cầu môi trường
 
-## ⚙️ Cài đặt & Chạy ứng dụng
+- Android Studio
+- JDK 17
+- Android SDK 35
+- Thiết bị hoặc emulator từ Android 8.0 (API 26) trở lên
 
-Để chạy dự án này trên máy local của bạn:
+## ▶️ Cài đặt và chạy dự án
 
-1.  **Clone dự án:**
-    ```bash
-    git clone https://github.com/bengimixDoo/androidsmartspend.git
-    ```
-2.  **Mở trong Android Studio:**
-   * Khởi động Android Studio -> Open -> Chọn thư mục vừa clone.
-3.  **Đồng bộ Gradle:**
-   * Đợi Android Studio tải các thư viện cần thiết.
-4.  **Chạy ứng dụng:**
-   * Kết nối thiết bị thật hoặc mở máy ảo (Emulator).
-   * Nhấn nút **Run** (biểu tượng tam giác xanh).
----
+1. Clone dự án:
+   ```bash
+   git clone https://github.com/bengimixDoo/androidsmartspend.git
+   ```
+2. Mở thư mục dự án bằng Android Studio.
+3. Đảm bảo file `app/google-services.json` đã được cấu hình đúng cho Firebase project của bạn.
+4. Sync Gradle để tải dependencies.
+5. Chạy ứng dụng trên thiết bị thật hoặc emulator.
 
-*Dự án được thực hiện cho mục đích học tập.*
+## 📝 Ghi chú
+
+- Dữ liệu giao dịch và danh mục được lưu cục bộ bằng SQLite.
+- Khi người dùng đăng nhập, ứng dụng có thể đồng bộ dữ liệu với Firestore.
+- Dự án được thực hiện cho mục đích học tập.
