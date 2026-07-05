@@ -116,3 +116,5 @@ Nếu thiếu `google-services.json`, project có thể vẫn mở được như
 - Khi đăng nhập, dữ liệu có thể được đồng bộ với Firestore để hỗ trợ khôi phục hoặc dùng lại trên thiết bị khác
 - Một số dữ liệu thiết lập ban đầu như ngân sách, tiền mặt và tiền trong thẻ được lưu trong `SharedPreferences`
 - Ứng dụng có hỗ trợ thông báo chi tiêu, vì vậy thiết bị cần cho phép notification để trải nghiệm đầy đủ
+
+*Dự án được thực hiện cho mục đích học tập.*
